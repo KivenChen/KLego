@@ -81,13 +81,13 @@ def _l(r=1, p=100, t=None, b=True): # changed the rule
     L.turn(p, r, b)
 
 
-def _r(p=75, r=1, t=None, b=True):
+def _r(p=100, r=1, t=None, b=True):
     if r < 15:  # todo: say this in the documentation
         r *= 360
     R.turn(p, r, b)
 
 
-def f(unlimited=False, p=100, r=1, t=None, b=True):
+def f(unlimited=False, r=1, p=100, t=None, b=True):
     global lmove, rmove, kill
     stop()
     if unlimited:
