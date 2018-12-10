@@ -1,3 +1,5 @@
+# Copyright - Kiven, 2018
+
 import nxt.locator as locator
 from nxt.motor import *
 from threading import Thread
@@ -7,7 +9,8 @@ from time import sleep
 gb_bound = 20  # todo: adapt these two values
 gw_bound = 39
 
-print("Powered by Kiven. Dec, 9th 2018")
+print("PyLego initializing.")
+print("Copyright - Kiven, 2018")
 
 b = None
 L = None
