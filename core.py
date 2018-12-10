@@ -9,27 +9,23 @@ gw_bound = 39
 
 print("Powered by Kiven. Dec, 9th 2018")
 
-print("Connecting")
-b = locator.find_one_brick(method=locator.Method(True, False))
-print("Connection to brick established\n")
-
-print("Initializing sensors")
-L = m_left = Motor(b, PORT_B)
-R = m_right = Motor(b, PORT_C)
+b = None
+L = None
+R = None
 lmove = Thread()
 rmove = Thread()
 M = SynchronizedMotors(None, None, None)
 kill = False
-light = Light(b, PORT_3)
-sonic = Ultrasonic(b, PORT_2)
-touch = Touch(b, PORT_4)
-print("Initialization completed\n")
-print("Loading Actions")
+light = None
+sonic = None
+touch = None
 
-def reset():
+
+def reset(remote=False):
     global b, L, R, M, lmove, rmove, kill, light, sonic, touch
     print("Connecting")
-    b = locator.find_one_brick()
+    connect_method = locator.Method(not remote, remote)
+    b = locator.find_one_brick(method=connect_method)
     print("Connection to brick established\n")
 
     print("Initializing sensors")
@@ -46,11 +42,11 @@ def reset():
     print("Loading Actions")
 
 
-try:
-    if b is None:
+if not b:
+    try:
         reset()
-except:
-    reset()
+    except:
+        reset(True)
 
 '''
 def _handle_threads():
