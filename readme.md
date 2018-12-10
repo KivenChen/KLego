@@ -1,12 +1,24 @@
 # PyLego 使用指南
 
-## 提前准备
+## 环境
 
-- Python 2.7，目前只有 NXT 支持
+- Python 2.7，Python 3 目前无法使用前进/后退功能
+- 目前只有 NXT 支持
+- 基于 nxt-python 
+- 连接需要 pyusb 以及 ·pybluez 模块
+
+### 安装
+
 - 项目中有你需要的第三方库，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
-- 根据教程安装第三方库，并配置 USB 驱动，把乐高驱动换成 libusb-win32：https://blog.xuezhonghao.com/2018/08/16/nxt-python.html
-- 测试版目前仅支持 USB 调试。蓝牙模块正在最后调试阶段
-- 把 core.py 放在你正在写的 python 项目文件夹里面
+- 或者根据教程安装第三方库，并配置 USB 驱动，把乐高驱动换成 libusb-win32：
+    - https://blog.xuezhonghao.com/2018/08/16/nxt-python.html
+- （测试版目前仅支持 USB 调试。蓝牙模块正在最后调试阶段）
+- 以下2个步骤都可以
+
+    1. 把 nxt 文件夹放入你正在写的 python 项目文件夹
+    2. 命令行执行 `pip install nxt-python` 
+
+- 把 core.py 以及 放在你正在写的 python 项目文件夹里面
 - **目前(2018-12-10)的 `t` 参数暂未提供支持**
 
 
@@ -36,7 +48,11 @@ from core import *
 - 如果你不想要默认值，可以改其中一个、一些或者全部
 
 ## 运动函数
+
 ### `l(r=1, p=100, t=None, b=True)`
+
+---
+
 向左转的函数，注意是**小写的L**
 ####  参数解析：
 - `p`：马力。整数。默认值是75即75%马力
@@ -60,6 +76,9 @@ l(t=10) # 右轮转10秒
 ```
 
 ### `r(p=75, r=1, t=None, b=True)`
+
+---
+
 右转的函数。请参考 `l` 的说明
 
 ### `f(unlimited=False, r=1, p=100, t=None)`
@@ -77,31 +96,54 @@ f(True) # 一直前进直到 stop 被调用
 ```
 
 ### `b(unlimited=False, r=1, p=100, t=None, b=True)`
+
+---
+
 参考上一个
 
 ### `distance()`
+
+---
+
 获取一个整数：即超声波传感器的读数
 单位 **cm**
 
 ### `brightness()`
+
+---
+
 获取一个整数：光传感器的读数
 区间：0 ~ 100
 
 ### `hit()`
+
+---
+
 判断是否撞到物体（**传感器被按下，或者是距离<5cm**）
 返回值:
 - True：是的，撞到了
 - False： 不，~
 
 ### `black()`
+
+---
+
 判断地面是否为黑色。返回值参考上一个。
 
 ### `green()`
+
+---
+
 判断地面是否是绿色。参考上一个
 
 ### `white()`
+
+---
+
 白色
 
 ### `sound()`
+
+---
+
 发出声音**（尚不稳定）**
-```
