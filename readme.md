@@ -2,10 +2,10 @@
 
 ## 环境
 
-- Python 2.7，Python 3 目前无法使用前进/后退功能
+- Python 2.7 （Python 3 目前无法使用前进/后退功能）
 - 目前只有 NXT 支持
 - 基于 nxt-python 
-- 连接需要 pyusb 以及 ·pybluez 模块
+- 连接需要 pyusb 以及 pybluez 模块
 
 ### 安装
 
@@ -49,7 +49,7 @@ from core import *
 
 ## 运动函数
 
-### `l(r=1, p=100, t=None, b=True)`
+### `l(r=1, p=75, t=None, b=True)`
 
 ---
 
@@ -75,7 +75,7 @@ l(r=45) # 右轮转45度
 l(t=10) # 右轮转10秒
 ```
 
-### `r(p=75, r=1, t=None, b=True)`
+### `r(r=1, p=75, t=None, b=True)`
 
 ---
 
