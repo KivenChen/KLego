@@ -99,7 +99,7 @@ def f(unlimited=False, r=1, p=100, t=None, b=True):
         M.turn(p, r if r >=15 else r*360, b)
 
 
-def f(r=1, p=100, t=None, b=True):
+def f(r: int, p=100, t=None, b=True):
     M.turn(p, r if r >= 15 else r * 360, b)
 
 
