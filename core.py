@@ -17,7 +17,7 @@ L = None
 R = None
 lmove = Thread()
 rmove = Thread()
-M = SynchronizedMotors(None, None, None)
+M = None
 kill = False
 light = None
 sonic = None
@@ -28,7 +28,7 @@ def reset(remote=False):
     global b, L, R, M, lmove, rmove, kill, light, sonic, touch
     print("Connecting")
     connect_method = locator.Method(not remote, remote)
-    b = locator.find_one_brick(method=connect_method)
+    b = locator.find_one_brick(method=connect_method, debug=True)
     print("Connection to brick established\n")
 
     print("Initializing sensors")
@@ -62,14 +62,14 @@ def _handle_threads():
 '''
 
 def l(r=1, p=75, t=None, b=True):  # changed the rule
-    stop()
+    sleep(0.2)
     if r < 15: # todo: say this in the documentation
         r *= 360
     L.turn(p, r, b)
 
 
 def r(r=1, p=75, t=None, b=True):
-    stop()
+    sleep(0.2)
     if r < 15: # todo: say this in the documentation
         r *= 360
     R.turn(p, r, b)
@@ -90,26 +90,16 @@ def _r(p=100, r=1, t=None, b=True):
     R.turn(p, r, b)
 
 
-def f(unlimited=False, r=1, p=100, t=None, b=True):
+def f(r=1, p=75, t=None, b=True):
     global lmove, rmove, kill
-    stop()
-    if unlimited:
+    if not r or r==0:  # unlimited
         M.run(p)
     else:
-        M.turn(p, r if r >=15 else r*360, b)
-
-
-def f(r: int, p=100, t=None, b=True):
-    M.turn(p, r if r >= 15 else r * 360, b)
-
-
-def b(unlimited=False, r=1, p=100, t=None, b=True):
-    f(unlimited, -p, r, t, b)
+        M.turn(p, r if r >= 15 else r*360, False)
 
 
 def b(r=1, p=75, t=None, b=True):
     f(r, -p, t, b)
-
 
 def _test():
     m = SynchronizedMotors(L, R, 0.5)
@@ -125,6 +115,7 @@ def stop():
 
 
 def brightness():
+    Light().set_illuminated(True)
     return light.get_lightness()
 
 
