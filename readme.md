@@ -3,7 +3,6 @@
 
 
 - **不用搭积木**
-
 - 不用绕 Data Wire
 - **前进、转弯都可以在 3 个字符内**
 - 为什么不用 Python 来写乐高呢？
@@ -143,7 +142,7 @@ f(None) # 一直前进直到 stop 被调用
 
 
 ## 功能类函数
-
+		
 ### `reset(remote=True)`
 
 ---
@@ -174,14 +173,14 @@ f(None) # 一直前进直到 stop 被调用
 
 ## 传感类函数
 
-### `distance()`
+### `distance() -> int`
 
 ---
 
 获取一个整数：即超声波传感器的读数
 单位 **cm**
 
-### `brightness()`
+### `brightness() -> int`
 
 ---
 
@@ -197,19 +196,19 @@ f(None) # 一直前进直到 stop 被调用
 - True：是的，撞到了
 - False： 不，~
 
-### `black()`
+### `black() -> bool`
 
 ---
 
 判断地面是否为黑色。是则返回 True，否则 False。
 
-### `green()`
+### `green() -> bool`
 
 ---
 
 判断地面是否是绿色。参考上一个
 
-### `white()`
+### `white() -> bool`
 
 ---
 

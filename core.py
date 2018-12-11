@@ -1,5 +1,6 @@
 # Copyright - Kiven, 2018
 from wheels import *
+from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
 from threading import Thread
@@ -28,6 +29,9 @@ light = None
 sonic = None
 touch = None
 guard_process = True
+pos = Position()  # which marks the position of the robot
+boxes = Boxes()  # which stores all the boxes here
+
 
 _degree_to_spin_r = _to_rolls = \
 {
@@ -41,6 +45,13 @@ _degree_to_spin_r = _to_rolls = \
 
 
 def _guard():
+    pass
+
+
+def to_cm(r):
+    # this convert the roll param to centimeters
+    if r < 15:  # todo: complete this
+        r *= 360
     pass
 
 
@@ -84,14 +95,14 @@ def _handle_threads():
 
 def l(r=1, p=75, t=None, b=True):  # changed the rule
     sleep(0.2)
-    if r < 15: # todo: say this in the documentation
+    if r < 15:
         r *= 360
     L.turn(p, r, b)
 
 
 def r(r=1, p=75, t=None, b=True):
     sleep(0.2)
-    if r < 15: # todo: say this in the documentation
+    if r < 15:
         r *= 360
     R.turn(p, r, b)
 
@@ -112,10 +123,10 @@ def _r(p=100, r=1, t=None, b=True):
 
 
 def spin(r=1, p=75):
-    '''0.7 shows to be '''
     sleep(0.2)
     global _lock
     if type(r) == str:
+        pos.track(int(r), 0)
         r = _to_rolls[r]
     if r < 0:
         r, p = -r, -p
@@ -154,6 +165,7 @@ def hold_on():
 
 def f(r=1, p=75, t=None):
     global lmove, rmove, _lock
+    pos.track(0, to_cm(r))
     if not r or r==0:  # unlimited
         M.run(p)
     else:
