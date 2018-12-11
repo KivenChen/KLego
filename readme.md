@@ -32,8 +32,16 @@
 项目中有已经有需要的环境（Windows），但因为有一些细节工作，所以提供第三方教程[教程]: -https://blog.xuezhonghao.com/2018/08/16/nxt-python.html 
 
 ### 安装第三方库
-- Windows: 项目中有你需要的第三方库，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
+
+#### 连接相关
+
+- Windows: 项目中有你需要的部分第三方库，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
 - Mac: 请参考上述教程
+
+#### 内核相关
+
+- Windows：在 cmd 命令行运行：`pip install threading`
+- Mac：在 terminal 中运行：`sudo pip install threading` （需要权限）
 
 ### 配置驱动
 - Windows: 按照上述教程配置 USB 驱动，把乐高驱动换成 libusb-win32
@@ -142,7 +150,7 @@ f(None) # 一直前进直到 stop 被调用
 
 
 ## 功能类函数
-		
+
 ### `reset(remote=True)`
 
 ---

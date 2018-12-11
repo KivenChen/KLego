@@ -1,5 +1,4 @@
 # Copyright - Kiven, 2018
-from wheels import *
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
@@ -10,8 +9,8 @@ from threading import Thread
 gb_bound = 20  # todo: adapt these two values
 gw_bound = 39
 
-blue("PyLego initializing.")
-blue("Copyright - Kiven, 2018")
+print("PyLego initializing.")
+print("Copyright - Kiven, 2018")
 
 # initializing fields.
 # P.S. *private* fields and functions begin with '_',
