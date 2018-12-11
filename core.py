@@ -1,5 +1,5 @@
 # Copyright - Kiven, 2018
-
+from wheels import *
 import nxt.locator as locator
 from nxt.motor import *
 from threading import Thread
@@ -9,8 +9,8 @@ from threading import Thread
 gb_bound = 20  # todo: adapt these two values
 gw_bound = 39
 
-print("PyLego initializing.")
-print("Copyright - Kiven, 2018")
+blue("PyLego initializing.")
+blue("Copyright - Kiven, 2018")
 
 # initializing fields.
 # P.S. *private* fields and functions begin with '_',
@@ -152,7 +152,7 @@ def hold_on():
         R.turn(1, 1)
 
 
-def f(r=1, p=75, t=None, b=True):
+def f(r=1, p=75, t=None):
     global lmove, rmove, _lock
     if not r or r==0:  # unlimited
         M.run(p)
@@ -160,8 +160,8 @@ def f(r=1, p=75, t=None, b=True):
         M.turn(p, r if r >= 15 else r*360, False)
 
 
-def b(r=1, p=75, t=None, b=True):
-    f(r, -p, t, b)
+def b(r=1, p=75, t=None):
+    f(r, -p, t)
 
 
 def _test():
