@@ -9,6 +9,7 @@ so that the core tech of coordinating will not be open-sourced
 
 class Position:
 	x = 0
+
 	def __init__(self):
 		self.x = 0.0
 		self.y = 0.0

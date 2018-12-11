@@ -1,16 +1,21 @@
 # Copyright - Kiven, 2018
-
+from wheels import *
 import nxt.locator as locator
 from nxt.motor import *
 from threading import Thread
 from nxt.sensor import *
 from time import sleep
-
+from threading import Thread
 gb_bound = 20  # todo: adapt these two values
 gw_bound = 39
 
-print("PyLego initializing.")
-print("Copyright - Kiven, 2018")
+blue("PyLego initializing.")
+blue("Copyright - Kiven, 2018")
+
+# initializing fields.
+# P.S. *private* fields and functions begin with '_',
+# they are not supposed to be invoked by any users (for details please google or baidu it)
+# and the author will not be responsible for any mistakes caused by this
 
 b = None
 L = None
@@ -18,14 +23,29 @@ R = None
 lmove = Thread()
 rmove = Thread()
 M = None
-kill = False
+_lock = False
 light = None
 sonic = None
 touch = None
+guard_process = True
+
+_degree_to_spin_r = _to_rolls = \
+{
+    '90': 0.7,
+    '45': 0.33,
+    '30': 0.22,
+    '-90': -0.7,
+    '-45': -0.35,
+    '-30': -0.233,
+}
+
+
+def _guard():
+    pass
 
 
 def reset(remote=False):
-    global b, L, R, M, lmove, rmove, kill, light, sonic, touch
+    global b, L, R, M, lmove, rmove, _lock, light, sonic, touch
     print("Connecting")
     connect_method = locator.Method(not remote, remote)
     b = locator.find_one_brick(method=connect_method, debug=True)
@@ -34,10 +54,10 @@ def reset(remote=False):
     print("Initializing sensors")
     L = m_left = Motor(b, PORT_B)
     R = m_right = Motor(b, PORT_C)
-    M = SynchronizedMotors(L, R, 0.5)
+    M = SynchronizedMotors(L, R, 2)
     lmove = Thread()
     rmove = Thread()
-    kill = False
+    _lock = False
     light = Light(b, PORT_3)
     sonic = Ultrasonic(b, PORT_2)
     touch = Touch(b, PORT_4)
@@ -60,6 +80,7 @@ def _handle_threads():
         kill = False
     Thread(target=_do()).run()
 '''
+
 
 def l(r=1, p=75, t=None, b=True):  # changed the rule
     sleep(0.2)
@@ -90,16 +111,58 @@ def _r(p=100, r=1, t=None, b=True):
     R.turn(p, r, b)
 
 
-def f(r=1, p=75, t=None, b=True):
-    global lmove, rmove, kill
+def spin(r=1, p=75):
+    '''0.7 shows to be '''
+    sleep(0.2)
+    global _lock
+    if type(r) == str:
+        r = _to_rolls[r]
+    if r < 0:
+        r, p = -r, -p
+    if r < 15:
+        r *= 360
+    op1 = Thread(target=_locked(L.turn), args=(-p, r, False))
+    op2 = Thread(target=_locked(R.turn), args=(p, r, False))
+    op1.start()
+    op2.start()
+    while _lock:
+        pass
+    # print("exit turn")
+
+
+def _locked(func):
+    def output(*args):
+        global _lock
+        # print("locked")
+        _lock = True
+        func(*args)
+        _lock = False
+        # print("unlocked")
+    return output
+
+
+def hold_on():
+    Thread(target=_locked(raw_input),
+           args=("To end this hold-on, please enter anything: ",))\
+        .start()
+    global _lock
+    while _lock:
+        L.turn(1, 1)
+        sleep(0.5)
+        R.turn(1, 1)
+
+
+def f(r=1, p=75, t=None):
+    global lmove, rmove, _lock
     if not r or r==0:  # unlimited
         M.run(p)
     else:
         M.turn(p, r if r >= 15 else r*360, False)
 
 
-def b(r=1, p=75, t=None, b=True):
-    f(r, -p, t, b)
+def b(r=1, p=75, t=None):
+    f(r, -p, t)
+
 
 def _test():
     m = SynchronizedMotors(L, R, 0.5)
@@ -115,7 +178,6 @@ def stop():
 
 
 def brightness():
-    Light().set_illuminated(True)
     return light.get_lightness()
 
 
