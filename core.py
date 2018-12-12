@@ -2,12 +2,14 @@
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
-from threading import Thread
+
 from nxt.sensor import *
 from time import sleep
 from threading import Thread
-gb_bound = 20  # todo: adapt these two values
-gw_bound = 39
+
+
+_GREEN_BLACK_BOUNDARY_ = 20  # todo: adapt these two values
+_GREEN_WHITE_BOUNDARY_ = 39
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -28,6 +30,8 @@ light = None
 sonic = None
 touch = None
 guard_process = True
+_debug = True
+
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
 
@@ -37,6 +41,7 @@ _degree_to_spin_r = _to_rolls = \
     '90': 0.7,
     '45': 0.33,
     '30': 0.22,
+    '15': 0.11,
     '-90': -0.7,
     '-45': -0.35,
     '-30': -0.233,
@@ -48,7 +53,7 @@ def _guard():
 
 
 def to_cm(r):
-    # this convert the roll param to centimeters
+    # this converts the roll param to centimeters
     if r < 15:  # todo: complete this
         r *= 360
     pass
@@ -56,14 +61,18 @@ def to_cm(r):
 
 def reset(remote=False):
     global b, L, R, M, lmove, rmove, _lock, light, sonic, touch
+    try:
+        locator.read_config()
+    except:
+        locator.make_config()
     print("Connecting")
     connect_method = locator.Method(not remote, remote)
     b = locator.find_one_brick(method=connect_method, debug=True)
     print("Connection to brick established\n")
 
     print("Initializing sensors")
-    L = m_left = Motor(b, PORT_B)
-    R = m_right = Motor(b, PORT_C)
+    L = Motor(b, PORT_B)
+    R = Motor(b, PORT_C)
     M = SynchronizedMotors(L, R, 2)
     lmove = Thread()
     rmove = Thread()
@@ -71,13 +80,17 @@ def reset(remote=False):
     light = Light(b, PORT_3)
     sonic = Ultrasonic(b, PORT_2)
     touch = Touch(b, PORT_4)
+
+    # calibrate light sensor
+    light.set_illuminated(True)
+    light.set_illuminated(False)
+
     print("Initialization completed\n")
-    print("Loading Actions")
 
 
 if not b:
     try:
-        reset()
+        reset(_debug)
     except:
         reset(True)
 
@@ -109,7 +122,7 @@ def r(r=1, p=75, t=None, b=True):
 right = r
 
 
-def _l(r=1, p=100, t=None, b=True): # changed the rule
+def _l(r=1, p=100, t=None, b=True):  # changed the rule
     if r < 15:  # todo: say this in the documentation
         r *= 360
     L.turn(p, r, b)
@@ -130,7 +143,7 @@ def spin(r=1, p=75):
     if r < 0:
         r, p = -r, -p
     if r < 15:
-        r *= 360
+        r = int(360*r)  # considered that the _to_roll returns float
     op1 = Thread(target=_locked(L.turn), args=(-p, r, False))
     op2 = Thread(target=_locked(R.turn), args=(p, r, False))
     op1.start()
@@ -163,7 +176,7 @@ def hold_on():
 
 
 def f(r=1, p=75, t=None):
-    global lmove, rmove, _lock
+    global _lock
     pos.track(0, to_cm(r))
     if not r or r==0:  # unlimited
         M.run(p)
@@ -188,6 +201,36 @@ def stop():
     R.idle()
 
 
+def _discover(boxes, pos, sonic_dist):
+    # this method records a new block
+    # if this one is an existed one, return false
+    _DELTA_ = 0
+    if sonic_dist > 200:
+        return False
+    robo_pos = pos
+    x = robo_pos.x
+    y = robo_pos.y
+    d = robo_pos.d
+    dx = int(sin(rad(d)) * float(sonic_dist))
+    dy = int(cos(rad(d)) * float(sonic_dist))
+    t_x = x + dx
+    t_y = y + dy
+    pos = Position(t_x, t_y)
+    if boxes.overlapped(pos):
+        return False
+    else:
+        boxes.add(pos)
+        return True
+
+
+def discover(boxes):
+    # automatically rotate 360 and record every boxes detected within 200 cm
+    global pos
+    for i in range(12):
+        _discover(boxes, pos, distance())
+        spin('30')
+
+
 def brightness():
     return light.get_lightness()
 
@@ -197,19 +240,19 @@ def distance():
 
 
 def green():
-    if gw_bound > brightness() > gb_bound:
+    if _GREEN_WHITE_BOUNDARY_ > brightness() > _GREEN_BLACK_BOUNDARY_:
         return True
     return False
 
 
 def black():
-    if brightness() < gb_bound:
+    if brightness() < _GREEN_BLACK_BOUNDARY_:
         return True
     return False
 
 
 def white():
-    if brightness() > gw_bound:
+    if brightness() > _GREEN_WHITE_BOUNDARY_:
         return True
     return False
 

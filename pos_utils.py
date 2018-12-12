@@ -1,5 +1,5 @@
-from math import sin, sqrt, cos, radians as r
-from core import *
+from math import sin, sqrt, cos, radians as rad
+
 '''
 this file provides the utilities for tracking robot and boxes locations
 the **core** module will import this file and create *boxes* and *pos* for use
@@ -12,7 +12,7 @@ so that the core tech of coordinating will not be open-sourced
 
 
 class Position:
-	def __init__(self, x=0.0, y=0.0, d=0):
+	def __init__(self, x=0, y=0, d=0):
 		self.x = x
 		self.y = y
 		self.d = d
@@ -26,8 +26,8 @@ class Position:
 		if continuous:
 			pass
 		self.d += d_delta
-		dx = dpm * sin(r(self.d))
-		dy = dpm * cos(r(self.d))
+		dx = dpm * sin(rad(self.d))
+		dy = dpm * cos(rad(self.d))
 		self.x += dx
 		self.y += dy
 		return self
@@ -38,7 +38,7 @@ class Position:
 
 
 class Box(Position):
-	def __init__(self, x=0., y=0., d=0, ok=True):
+	def __init__(self, x=0, y=0, d=0, ok=True):
 		self.x = x
 		self.y = y
 		self.d = d
@@ -75,31 +75,6 @@ class Boxes(list):
 				return True
 		return False
 
-	def _discover(self, pos, sonic_dist):
-		# this method records a new block
-		# if this one is an existed one, return false
-		_DELTA_ = 0
-		if sonic_dist > 200:
-			return False
-		robo_pos = pos
-		x = robo_pos.x
-		y = robo_pos.y
-		d = robo_pos.d
-		t_x = x + sin(r(d))*sonic_dist
-		t_y = y + cos(r(d))*sonic_dist
-		pos = Position(t_x, t_y)
-		if self.overlapped(pos):
-			return False
-		else:
-			self.add(pos)
-			return True
-
-	def discover(self):
-		# automatically rotate 360 and record every boxes detected within 200 cm
-		global pos
-		for i in range(24):
-			self._discover(pos, distance())
-			spin('15')
 
 
 def test():
