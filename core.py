@@ -30,7 +30,7 @@ light = None
 sonic = None
 touch = None
 guard_process = True
-_debug = True
+_debug = False
 
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here

@@ -16,6 +16,15 @@
 - 基于 nxt-python 
 - 连接需要 pyusb 以及 pybluez 模块
 
+## V0.91 更新
+
+更新于 12-11-18
+
+- **紧急修复**：蓝牙连接问题，以及蓝牙模块的安装问题。请查看文档的**安装**部分
+- **新增**：实验性定位模块 `pos_utils`
+- 相比 v0.9 时处于测试期的 `pos_utils`，改变了使用细节（见**定位模块的使用 - discover()**）
+- 稳定性提升
+
 ## V0.9 更新
 更新于 12-10-18
 - 修复 bug 并提高稳定性
@@ -34,6 +43,9 @@
 ### 安装第三方库
 
 #### 连接相关
+
+- Windows: 从以下链接安装 VC 9.0 Compiler for Python 并安装
+  - https://www.microsoft.com/en-us/download/details.aspx?id=44266
 
 - Windows: 项目中有你需要的部分第三方库，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
 - Mac: 请参考上述教程
@@ -221,3 +233,66 @@ f(None) # 一直前进直到 stop 被调用
 ---
 
 白色
+
+
+## 定位模块的使用
+
+方位检测的基础实现在 **pos_utils.py** 中，~~与 PyLego 的核心 **core.py** 为相互依赖关系~~ 在 v0.91 中，转为 core 对 pos_utils 的单向依赖。使用时只需要导入 **core.py** 即可食用 。详见下文的 `pos` 和 `boxes`
+``` python
+from core import *
+```
+
+### pos
+一个 `Position`类的对象。
+core 模块会使用 `pos` 自动记录机器人在规范化移动之后的位置，注意：只记录以下情况的位置变化——
+
+- 原地转特殊角
+- 直行
+
+包含相对原点 x, y 坐标，以及相对原始位置的转角 `d`，单位为顺时针角度，0~360
+
+#### `Position` 的子类 `Box`
+已经发现的块为 `Box` 类型，隶属 `Position` 的子类，比 `Position` 多了 `new`参数。
+- 当 `new` 为 True, 代表这个块被发现，但不知道是不是得分块，可以一去
+- 否则，代表这个块**不是**得分块 / 已经碰过
+
+这个继承关系使 `Position` 能兼容 `Box`（见 `dist()`）
+
+#### **dist(self, position/box)**  (Position / Box 的成员函数)
+检测自身与某个位置 / 某个box 的距离
+
+例子：
+``` python
+boxes.discover()  # 检查周围的块
+boxes[0].dist(pos)  # 机器人与第 1 个被发现的块的距离
+pos.dist(boxes[0])  # 和第二个等价 
+```
+### boxes
+一个被定制过的列表，用于存储已经发现的块。
+
+#### **nearest() -> Box**
+返回一个 Box。在被 `boxes` 记录在案的 boxes 中寻找：
+- `new = True`
+- 而且离机器人最近的
+
+#### **overlapped(target_pos, threshold=14) -> bool**
+如果你检测到一个 box，但是担心重复检测，可以用这个函数。
+
+`threshold`：默认如果距离小于 **14 cm** 即重叠
+
+### core 中集成的函数
+
+#### **discover(boxes)**
+**v0.91 更新：将 discover 从 boxes 类的成员函数转为 core 模块的静态函数**
+
+控制机器人旋转360度，并记录各个方向上的块。此函数会过滤重复检测的结果。
+
+#### 定位模块的例子：一个流程
+``` python
+while True():
+    discover(boxes)  # 检测物块。
+	target = boxes.nearest()  # 挑最近的，没去过的
+	'''go to the target ...'''
+	target.new = False  # 标记为已去过
+```
+
