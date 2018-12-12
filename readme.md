@@ -42,7 +42,7 @@
 
 #### 连接相关
 
-- Windows: (**修复蓝牙模块的安装问题**) 从以下链接安装 VC 9.0 Compiler for Python 并安装
+- Windows: (**修复蓝牙模块的安装问题**) 从以下链接下载并安装 VC 9.0 Compiler for Python
   - https://www.microsoft.com/en-us/download/details.aspx?id=44266
 
 - Windows: 项目中有你需要的部分第三方库(**为确保稳定性，请使用 v0.91 最新版提供的安装文件**)，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
