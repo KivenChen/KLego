@@ -45,7 +45,12 @@ def find_MS_SDK():
     if sys.version_info[0:2] == (2, 7):
         # Microsoft Visual C++ Compiler for Python 2.7
         # https://www.microsoft.com/en-us/download/details.aspx?id=44266
-        candidate_paths.append(r'Common Files\Microsoft\Visual C++ for Python\9.0\WinSDK')
+
+        # modified by Kiven to adapt Windows 10
+        import getpass
+        name = getpass.getuser()
+        drive = os.getenv('windir')[:3]
+        candidate_paths.append(drive+ r'\users/' + name + r'\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\WinSDK')
 
     # Microsoft SDKs
     if sys.version < '3.3':
@@ -67,6 +72,9 @@ def find_MS_SDK():
             candidate_sdk = os.path.join(candidate_root, candidate_path)
             if os.path.exists(candidate_sdk):
                 return candidate_sdk
+            # modified by Kiven to adapt to Windows 10
+            if os.path.exists(candidate_path):
+                return candidate_path
     raise SDKException("Could not find the Windows Platform SDK.")
 	
 if sys.platform == 'win32':
