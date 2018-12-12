@@ -30,8 +30,6 @@
 - 修复 bug 并提高稳定性
 - 改进`f()`和`b()`的参数，使之更简洁
 
-
-
 - **新增：图形化无法实现的重磅功能：原地旋转**
     - 关于实现请查看 `spin()` 函数
 - 新增： `hold_on()`函数。开着命令行挂机，随时写点东西，不用担心 Lego 省电关机
@@ -44,10 +42,10 @@
 
 #### 连接相关
 
-- Windows: 从以下链接安装 VC 9.0 Compiler for Python 并安装
+- Windows: (**修复蓝牙模块的安装问题**) 从以下链接安装 VC 9.0 Compiler for Python 并安装
   - https://www.microsoft.com/en-us/download/details.aspx?id=44266
 
-- Windows: 项目中有你需要的部分第三方库，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
+- Windows: 项目中有你需要的部分第三方库(**为确保稳定性，请使用 v0.91 最新版提供的安装文件**)，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
 - Mac: 请参考上述教程
 
 #### 内核相关
