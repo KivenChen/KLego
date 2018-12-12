@@ -257,6 +257,9 @@ core 模块会使用 `pos` 自动记录机器人在规范化移动之后的位�
 这个继承关系使 `Position` 能兼容 `Box`（见 `dist()`）
 
 #### **dist(self, position/box)**  (Position / Box 的成员函数)
+
+---
+
 检测自身与某个位置 / 某个box 的距离
 
 例子：
@@ -269,6 +272,9 @@ pos.dist(boxes[0])  # 和第二个等价
 一个被定制过的列表，用于存储已经发现的块。
 
 #### **nearest() -> Box**
+
+---
+
 返回一个 Box。在被 `boxes` 记录在案的 boxes 中寻找：
 - `new = True`
 - 而且离机器人最近的
@@ -281,16 +287,19 @@ pos.dist(boxes[0])  # 和第二个等价
 ### core 中集成的函数
 
 #### **discover(boxes)**
+
+---
+
 **v0.91 更新：将 discover 从 boxes 类的成员函数转为 core 模块的静态函数**
 
 控制机器人旋转360度，并记录各个方向上的块。此函数会过滤重复检测的结果。
 
-#### 定位模块的例子：一个流程
+### 定位模块的例子：一个流程
 ``` python
-while True():
-    discover(boxes)  # 检测物块。
-	target = boxes.nearest()  # 挑最近的，没去过的
-	'''go to the target ...'''
-	target.new = False  # 标记为已去过
+while True:
+	discover(boxes)  # 检测物块。
+    target = boxes.nearest()  # 挑最近的，没去过的
+    '''go to the target ...'''
+    target.new = False  # 标记为已去过
 ```
 
