@@ -10,6 +10,8 @@ from threading import Thread
 
 _GREEN_BLACK_BOUNDARY_ = 20  # todo: adapt these two values
 _GREEN_WHITE_BOUNDARY_ = 39
+_LIGHT_BASE_ = 0
+_CM_EACH_ROLL_ = 0
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -52,11 +54,11 @@ def _guard():
     pass
 
 
-def to_cm(r):
+def to_cm(r): -> float
     # this converts the roll param to centimeters
-    if r < 15:  # todo: complete this
-        r *= 360
-    pass
+    if r >= 15:  # todo: complete this
+    	roll = r / 360
+    return _CM_EACH_ROLL_*roll
 
 
 def reset(remote=False):
@@ -150,6 +152,8 @@ def spin(r=1, p=75):
     op2.start()
     while _lock:
         pass
+    L.brake()
+    R.brake()
     # print("exit turn")
 
 
@@ -230,9 +234,16 @@ def discover(boxes):
         _discover(boxes, pos, distance())
         spin('30')
 
+def _calibrate_light_sensor_by_black():
+    global _LIGHT_BASE_
+    _LIGHT_BASE_ = brightness() - 10
+
 
 def brightness():
-    return light.get_lightness()
+    global _LIGHT_BASE_
+    if _LIGHT_BASE_ == 0:
+        _calibrate_light_sensor_by_black()
+    return light.get_lightness() - _LIGHT_BASE_
 
 
 def distance():
