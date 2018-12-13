@@ -2,11 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bbc11e6b-ae3b-406c-bbe0-bd3cf0f00f88" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/rl/core.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calibrate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/part-a.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PID.py" beforeDir="false" afterPath="$PROJECT_DIR$/PID.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/pos_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pybluez-master/examples/ble/beacon_scan.py" beforeDir="false" afterPath="$PROJECT_DIR$/pybluez-master/examples/ble/beacon_scan.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,54 +19,98 @@
     <session id="-2121478215">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="7" />
+          <entry key="project.closed" value="15" />
           <entry key="project.open.time.0" value="2" />
-          <entry key="project.open.time.4" value="2" />
+          <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.3" value="1" />
+          <entry key="project.open.time.4" value="9" />
           <entry key="project.open.time.5" value="3" />
           <entry key="project.open.time.6" value="2" />
-          <entry key="project.opened" value="9" />
+          <entry key="project.open.time.7" value="1" />
+          <entry key="project.opened" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="18" />
+          <entry key="py" value="25" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="18" />
+          <entry key="Python" value="25" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="5265" />
-          <entry key="dummy" value="4" />
-          <entry key="py" value="12718" />
-          <entry key="txt" value="12" />
+          <entry key="Python Console" value="9175" />
+          <entry key="dummy" value="9" />
+          <entry key="py" value="16769" />
+          <entry key="txt" value="27" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="16" />
-          <entry key="Python" value="17983" />
+          <entry key="PLAIN_TEXT" value="36" />
+          <entry key="Python" value="25944" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-314">
-              <caret line="25" column="8" lean-forward="true" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
+            <state relative-caret-position="285">
+              <caret line="158" lean-forward="true" selection-start-line="158" selection-end-line="158" />
               <folding>
-                <element signature="e#26#46#0" expanded="true" />
-                <marker date="1544499755819" expanded="true" signature="1005:1146" ph="..." />
-                <marker date="1544499755819" expanded="true" signature="1030:1035" ph="..." />
-                <marker date="1544499755819" expanded="true" signature="1030:1146" ph="..." />
-                <marker date="1544499755819" expanded="true" signature="3157:3378" ph="..." />
+                <element signature="e#26#49#0" expanded="true" />
+                <marker date="1544706020088" expanded="true" signature="3077:3165" ph="..." />
+                <marker date="1544706020088" expanded="true" signature="3257:3378" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/PID.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/calibrate.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1007">
+              <caret line="53" column="7" selection-start-line="53" selection-start-column="7" selection-end-line="53" selection-end-column="7" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+                <marker date="1544600480167" expanded="true" signature="95:256" ph="..." />
+                <marker date="1544600480167" expanded="true" signature="279:284" ph="..." />
+                <marker date="1544600480167" expanded="true" signature="406:409" ph="..." />
+                <marker date="1544600480167" expanded="true" signature="427:432" ph="..." />
+                <marker date="1544600480167" expanded="true" signature="730:881" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/part-a.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="304">
+              <caret line="16" column="35" lean-forward="true" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/nxt/motor.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="104">
+              <caret line="348" column="63" selection-start-line="348" selection-start-column="63" selection-end-line="348" selection-end-column="63" />
             </state>
           </provider>
         </entry>
@@ -73,58 +118,21 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pos_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="92" column="13" lean-forward="true" selection-start-line="92" selection-start-column="13" selection-end-line="92" selection-end-column="13" />
+            <state relative-caret-position="114">
+              <caret line="18" column="28" selection-start-line="18" selection-start-column="28" selection-end-line="18" selection-end-column="28" />
               <folding>
-                <element signature="e#0#45#0" expanded="true" />
-                <marker date="1544525396458" expanded="true" signature="1176:1211" ph="..." />
-                <marker date="1544525396458" expanded="true" signature="1647:1650" ph="..." />
-                <marker date="1544525396458" expanded="true" signature="1647:1862" ph="..." />
-                <marker date="1544525396458" expanded="true" signature="1899:1902" ph="..." />
-                <marker date="1544525396458" expanded="true" signature="2302:2305" ph="..." />
-                <marker date="1544525396458" expanded="true" signature="2475:2477" ph="..." />
+                <marker date="1544578848559" expanded="true" signature="1158:1193" ph="..." />
+                <marker date="1544578848559" expanded="true" signature="1629:1632" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/rl/core.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/Anaconda3/envs/torch/Lib/site-packages/nxt/motor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2356">
-              <caret line="124" column="16" selection-start-line="124" selection-start-column="16" selection-end-line="124" selection-end-column="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Anaconda3/envs/torch/Lib/site-packages/nxt/brick.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4161">
-              <caret line="224" column="8" selection-start-line="224" selection-start-column="8" selection-end-line="224" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Anaconda3/envs/torch/Lib/site-packages/nxt/locator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2109">
-              <caret line="111" column="20" selection-start-line="111" selection-start-column="20" selection-end-line="111" selection-end-column="20" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/nxt/motor.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4047">
-              <caret line="213" column="36" selection-start-line="213" selection-start-column="36" selection-end-line="213" selection-end-column="36" />
+            <state relative-caret-position="7638">
+              <caret line="402" column="14" selection-start-line="402" selection-start-column="14" selection-end-line="402" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -172,9 +180,14 @@
     <findStrings>
       <find>kill</find>
       <find>go</find>
+      <find>wheels</find>
+      <find>gw_bound</find>
+      <find>synchronizedtacho</find>
+      <find>basemotor</find>
     </findStrings>
     <replaceStrings>
       <replace />
+      <replace>_GREEN_WHITE_BOUNDARY_</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -187,17 +200,21 @@
         <option value="$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/nxt/locator.py" />
         <option value="$PROJECT_DIR$/mainpy2.py" />
         <option value="$PROJECT_DIR$/main.py" />
-        <option value="$PROJECT_DIR$/core.py" />
-        <option value="$PROJECT_DIR$/pos_utils.py" />
         <option value="$PROJECT_DIR$/rl.py" />
         <option value="$PROJECT_DIR$/rl/core.py" />
+        <option value="$PROJECT_DIR$/pybluez-master/setup.py" />
+        <option value="$PROJECT_DIR$/part-a.py" />
+        <option value="$PROJECT_DIR$/calibrate.py" />
+        <option value="$PROJECT_DIR$/PID.py" />
+        <option value="$PROJECT_DIR$/pos_utils.py" />
+        <option value="$PROJECT_DIR$/core.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-10" />
-    <option name="width" value="980" />
-    <option name="height" value="1040" />
+    <option name="x" value="-9" />
+    <option name="width" value="978" />
+    <option name="height" value="1039" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -211,6 +228,15 @@
             <path>
               <item name="lego-assignment" type="b2602c69:ProjectViewProjectNode" />
               <item name="lego-assignment" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lego-assignment" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lego-assignment" type="462c0819:PsiDirectoryNode" />
+              <item name="nxt" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lego-assignment" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
             </path>
           </expand>
           <select />
@@ -240,7 +266,49 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pos_utils">
+  <component name="RunManager" selected="Python.core">
+    <configuration name="PID" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lego-assignment" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PID.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="calibrate" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lego-assignment" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/calibrate.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="core" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="lego-assignment" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -308,12 +376,16 @@
       <item itemvalue="Python.main" />
       <item itemvalue="Python.core" />
       <item itemvalue="Python.pos_utils" />
+      <item itemvalue="Python.calibrate" />
+      <item itemvalue="Python.PID" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.core" />
+        <item itemvalue="Python.PID" />
+        <item itemvalue="Python.calibrate" />
         <item itemvalue="Python.pos_utils" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.core" />
       </list>
     </recent_temporary>
   </component>
@@ -345,7 +417,14 @@
       <option name="project" value="LOCAL" />
       <updated>1544497724737</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Something new.">
+      <created>1544526329989</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1544526329989</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TodoView">
@@ -359,21 +438,22 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.44822696" visible="true" weight="0.110303834" />
-      <window_info id="Structure" order="1" sideWeight="0.5517731" side_tool="true" visible="true" weight="0.110303834" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8398204" visible="true" weight="0.110303834" />
+      <window_info id="Structure" order="1" sideWeight="0.16017964" side_tool="true" visible="true" weight="0.110303834" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.2680851" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.2638298" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.0" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.44680852" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.446198" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32907802" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.05248227" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -385,7 +465,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="bug fix" />
     <MESSAGE value="v0.9" />
-    <option name="LAST_COMMIT_MESSAGE" value="v0.9" />
+    <MESSAGE value="Something new." />
+    <option name="LAST_COMMIT_MESSAGE" value="Something new." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/activator.py" />
@@ -412,10 +493,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Anaconda3/envs/torch/Lib/site-packages/nxt/motor.py">
+    <entry file="file://$PROJECT_DIR$/wheels.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2356">
-          <caret line="124" column="16" selection-start-line="124" selection-start-column="16" selection-end-line="124" selection-end-column="16" />
+        <state relative-caret-position="323">
+          <caret line="21" column="16" lean-forward="true" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rl.py" />
+    <entry file="file://$PROJECT_DIR$/rl/core.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nxt/brick.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-437">
+          <caret line="19" column="33" lean-forward="true" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pybluez-master/macos/_bluetoothsockets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="115" column="8" selection-start-line="115" selection-start-column="8" selection-end-line="115" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pybluez-master/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1292">
+          <caret line="71" column="49" selection-start-line="71" selection-start-column="49" selection-end-line="71" selection-end-column="49" />
         </state>
       </provider>
     </entry>
@@ -437,6 +543,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4047">
           <caret line="213" column="36" selection-start-line="213" selection-start-column="36" selection-end-line="213" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PID.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/Anaconda3/envs/torch/Lib/site-packages/nxt/motor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7638">
+          <caret line="402" column="14" selection-start-line="402" selection-start-column="14" selection-end-line="402" selection-end-column="14" />
         </state>
       </provider>
     </entry>
@@ -464,48 +580,60 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wheels.py">
+    <entry file="file://$PROJECT_DIR$/pos_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="21" column="16" lean-forward="true" selection-start-line="21" selection-start-column="16" selection-end-line="21" selection-end-column="16" />
+        <state relative-caret-position="114">
+          <caret line="18" column="28" selection-start-line="18" selection-start-column="28" selection-end-line="18" selection-end-column="28" />
+          <folding>
+            <marker date="1544578848559" expanded="true" signature="1158:1193" ph="..." />
+            <marker date="1544578848559" expanded="true" signature="1629:1632" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/calibrate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1007">
+          <caret line="53" column="7" selection-start-line="53" selection-start-column="7" selection-end-line="53" selection-end-column="7" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1544600480167" expanded="true" signature="95:256" ph="..." />
+            <marker date="1544600480167" expanded="true" signature="279:284" ph="..." />
+            <marker date="1544600480167" expanded="true" signature="406:409" ph="..." />
+            <marker date="1544600480167" expanded="true" signature="427:432" ph="..." />
+            <marker date="1544600480167" expanded="true" signature="730:881" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/part-a.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="16" column="35" lean-forward="true" selection-start-line="16" selection-start-column="35" selection-end-line="16" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nxt/motor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="104">
+          <caret line="348" column="63" selection-start-line="348" selection-start-column="63" selection-end-line="348" selection-end-column="63" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-314">
-          <caret line="25" column="8" lean-forward="true" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
+        <state relative-caret-position="285">
+          <caret line="158" lean-forward="true" selection-start-line="158" selection-end-line="158" />
           <folding>
-            <element signature="e#26#46#0" expanded="true" />
-            <marker date="1544499755819" expanded="true" signature="1005:1146" ph="..." />
-            <marker date="1544499755819" expanded="true" signature="1030:1035" ph="..." />
-            <marker date="1544499755819" expanded="true" signature="1030:1146" ph="..." />
-            <marker date="1544499755819" expanded="true" signature="3157:3378" ph="..." />
+            <element signature="e#26#49#0" expanded="true" />
+            <marker date="1544706020088" expanded="true" signature="3077:3165" ph="..." />
+            <marker date="1544706020088" expanded="true" signature="3257:3378" ph="..." />
           </folding>
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rl.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pos_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="92" column="13" lean-forward="true" selection-start-line="92" selection-start-column="13" selection-end-line="92" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#45#0" expanded="true" />
-            <marker date="1544525396458" expanded="true" signature="1176:1211" ph="..." />
-            <marker date="1544525396458" expanded="true" signature="1647:1650" ph="..." />
-            <marker date="1544525396458" expanded="true" signature="1647:1862" ph="..." />
-            <marker date="1544525396458" expanded="true" signature="1899:1902" ph="..." />
-            <marker date="1544525396458" expanded="true" signature="2302:2305" ph="..." />
-            <marker date="1544525396458" expanded="true" signature="2475:2477" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rl/core.py">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>

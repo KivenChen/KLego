@@ -21,7 +21,7 @@ service = BeaconService()
 devices = service.scan(2)
 
 for address, data in list(devices.items()):
-    b = Beacon(data, address)
-    print(b)
+    brick = Beacon(data, address)
+    print(brick)
 
 print("Done.")

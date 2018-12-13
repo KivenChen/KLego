@@ -19,7 +19,7 @@ print("Copyright - Kiven, 2018")
 # they are not supposed to be invoked by any users (for details please google or baidu it)
 # and the author will not be responsible for any mistakes caused by this
 
-b = None
+brick = None
 L = None
 R = None
 lmove = Thread()
@@ -30,8 +30,9 @@ light = None
 sonic = None
 touch = None
 guard_process = True
-_debug = False
-
+_debug = True
+_TURN_RATIO_ = 1
+_LIGHT_BASE_ = 0
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
 
@@ -59,40 +60,7 @@ def to_cm(r):
     pass
 
 
-def reset(remote=False):
-    global b, L, R, M, lmove, rmove, _lock, light, sonic, touch
-    try:
-        locator.read_config()
-    except:
-        locator.make_config()
-    print("Connecting")
-    connect_method = locator.Method(not remote, remote)
-    b = locator.find_one_brick(method=connect_method, debug=True)
-    print("Connection to brick established\n")
 
-    print("Initializing sensors")
-    L = Motor(b, PORT_B)
-    R = Motor(b, PORT_C)
-    M = SynchronizedMotors(L, R, 2)
-    lmove = Thread()
-    rmove = Thread()
-    _lock = False
-    light = Light(b, PORT_3)
-    sonic = Ultrasonic(b, PORT_2)
-    touch = Touch(b, PORT_4)
-
-    # calibrate light sensor
-    light.set_illuminated(True)
-    light.set_illuminated(False)
-
-    print("Initialization completed\n")
-
-
-if not b:
-    try:
-        reset(_debug)
-    except:
-        reset(True)
 
 '''
 def _handle_threads():
@@ -150,6 +118,7 @@ def spin(r=1, p=75):
     op2.start()
     while _lock:
         pass
+    return L.get_tacho().tacho_count, R.get_tacho().tacho_count
     # print("exit turn")
 
 
@@ -175,13 +144,44 @@ def hold_on():
         R.turn(1, 1)
 
 
+def _get_counts(motor=None):
+    if motor is None:
+        motor = M
+        return motor.get_tacho().leader_tacho.tacho_count, motor.get_tacho().follower_tacho.tacho_count
+    return motor.get_tacho().tacho_count
+
+
+def _stopped(motor=None):
+    if motor is None:
+        motor = M
+    return motor._get_new_state().power == 0
+
+
+def _continuous_track():
+    global M
+    M.reset_position(True)
+    prev, _ = _get_counts()
+    while not _stopped():
+        sleep(0.1)
+        now, _ = _get_counts()
+        pos.track(0, to_cm(now-prev))
+
+
+
+
+
+
 def f(r=1, p=75, t=None):
     global _lock
-    pos.track(0, to_cm(r))
+    # pos.track(0, to_cm(r))
     if not r or r==0:  # unlimited
         M.run(p)
+        Thread(target=_continuous_track()).start()
     else:
         M.turn(p, r if r >= 15 else r*360, False)
+        M.brake()
+
+    return M.get_tacho().leader_tacho.tacho_count, M.get_tacho().follower_tacho.tacho_count
 
 
 def b(r=1, p=75, t=None):
@@ -232,7 +232,8 @@ def discover(boxes):
 
 
 def brightness():
-    return light.get_lightness()
+    global _LIGHT_BASE_
+    return light.get_lightness()-_LIGHT_BASE_
 
 
 def distance():
@@ -262,4 +263,37 @@ def hit():
 
 
 def sound():
-    Thread(target=b.play_tone_and_wait, args=(3, 1000)).start()
+    Thread(target=brick.play_tone_and_wait, args=(3, 1000)).start()
+
+def reset(remote=False):
+    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch
+    try:
+        locator.read_config()
+    except:
+        locator.make_config()
+    print("Connecting")
+    connect_method = locator.Method(not remote, remote)
+    brick = locator.find_one_brick(method=connect_method, debug=True)
+    print("Connection to brick established\n")
+
+    print("Initializing sensors")
+    L = Motor(brick, PORT_B)
+    R = Motor(brick, PORT_C)
+    L.get_tacho()
+    M = SynchronizedMotors(L, R, _TURN_RATIO_)
+    lmove = Thread()
+    rmove = Thread()
+    _lock = False
+    light = Light(brick, PORT_3)
+    sonic = Ultrasonic(brick, PORT_2)
+    touch = Touch(brick, PORT_4)
+
+    # calibrate light sensor
+    light.set_illuminated(True)
+    light.set_illuminated(False)
+    sleep(0.5)
+    _LIGHT_BASE_ = brightness()
+    print("Initialization completed\n")
+
+reset(False)
+
