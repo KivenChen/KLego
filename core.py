@@ -167,10 +167,6 @@ def _continuous_track():
         pos.track(0, to_cm(now-prev))
 
 
-
-
-
-
 def f(r=1, p=75, t=None):
     global _lock
     # pos.track(0, to_cm(r))
