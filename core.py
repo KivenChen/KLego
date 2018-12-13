@@ -2,14 +2,15 @@
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
-
+import nxt
+import atexit
 from nxt.sensor import *
 from time import sleep
 from threading import Thread
 
 
-_GREEN_BLACK_BOUNDARY_ = 20  # todo: adapt these two values
-_GREEN_WHITE_BOUNDARY_ = 39
+_GREEN_BLACK_BOUNDARY_ = 15  # todo: adapt these two values
+_GREEN_WHITE_BOUNDARY_ = 30
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -18,6 +19,7 @@ print("Copyright - Kiven, 2018")
 # P.S. *private* fields and functions begin with '_',
 # they are not supposed to be invoked by any users (for details please google or baidu it)
 # and the author will not be responsible for any mistakes caused by this
+
 
 brick = None
 L = None
@@ -32,20 +34,23 @@ touch = None
 guard_process = True
 _debug = True
 _TURN_RATIO_ = 1
-_LIGHT_BASE_ = 0
+_LIGHT_BASE_ = 12
+_CM_EACH_ROLL_ = 0
+
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
 
 
 _degree_to_spin_r = _to_rolls = \
 {
-    '90': 0.7,
-    '45': 0.33,
-    '30': 0.22,
-    '15': 0.11,
-    '-90': -0.7,
-    '-45': -0.35,
-    '-30': -0.233,
+    '90': 0.51,
+    '45': 0.26,
+    '30': 0.11,
+    '15': 0.85,
+    '-90': -0.52,
+    '-45': -0.265,
+    '-30': -0.173,
+    '-15': -0.086
 }
 
 
@@ -55,9 +60,9 @@ def _guard():
 
 def to_cm(r):
     # this converts the roll param to centimeters
-    if r < 15:  # todo: complete this
-        r *= 360
-    pass
+    if r > 15:  # todo: complete this
+        r /= 360
+    return r*_CM_EACH_ROLL_
 
 
 
@@ -103,7 +108,9 @@ def _r(p=100, r=1, t=None, b=True):
 
 
 def spin(r=1, p=75):
-    sleep(0.2)
+    L.reset_position(True)
+    R.reset_position(True)
+    sleep(0.1)
     global _lock
     if type(r) == str:
         pos.track(int(r), 0)
@@ -118,6 +125,7 @@ def spin(r=1, p=75):
     op2.start()
     while _lock:
         pass
+    stop()
     return L.get_tacho().tacho_count, R.get_tacho().tacho_count
     # print("exit turn")
 
@@ -151,7 +159,10 @@ def _get_counts(motor=None):
     return motor.get_tacho().tacho_count
 
 
-def _stopped(motor=None):
+_temp = 0
+
+
+def stopped(motor=None):
     if motor is None:
         motor = M
     return motor._get_new_state().power == 0
@@ -161,23 +172,24 @@ def _continuous_track():
     global M
     M.reset_position(True)
     prev, _ = _get_counts()
-    while not _stopped():
+    while not stopped():
         sleep(0.1)
-        now, _ = _get_counts()
+        # print("tracking")
+        now, _ = 0, 0
         pos.track(0, to_cm(now-prev))
-
+        prev = now
 
 def f(r=1, p=75, t=None):
     global _lock
     # pos.track(0, to_cm(r))
     if not r or r==0:  # unlimited
         M.run(p)
-        Thread(target=_continuous_track()).start()
+        work = Thread(target=_continuous_track)
+        work.run()
     else:
         M.turn(p, r if r >= 15 else r*360, False)
         M.brake()
-
-    return M.get_tacho().leader_tacho.tacho_count, M.get_tacho().follower_tacho.tacho_count
+    # return M.get_tacho().leader_tacho.tacho_count, M.get_tacho().follower_tacho.tacho_count
 
 
 def b(r=1, p=75, t=None):
@@ -227,6 +239,7 @@ def discover(boxes):
         spin('30')
 
 
+
 def brightness():
     global _LIGHT_BASE_
     return light.get_lightness()-_LIGHT_BASE_
@@ -257,12 +270,15 @@ def white():
 def hit():
     return touch.is_pressed() or distance() < 5
 
+def calibrate_light_by_black():
+    global _LIGHT_BASE_
+    _LIGHT_BASE_ = light.get_lightness() - 10
 
 def sound():
     Thread(target=brick.play_tone_and_wait, args=(3, 1000)).start()
 
 def reset(remote=False):
-    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch
+    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch, _LIGHT_BASE_
     try:
         locator.read_config()
     except:
@@ -288,8 +304,18 @@ def reset(remote=False):
     light.set_illuminated(True)
     light.set_illuminated(False)
     sleep(0.5)
-    _LIGHT_BASE_ = brightness()
+    # _LIGHT_BASE_ = brightness() - 10
     print("Initialization completed\n")
 
-reset(False)
+
+try:
+    reset()
+except locator.BrickNotFoundError:
+    print("\nswitching connection")
+    try:
+        reset(True)
+    except:
+        print("\nrefreshing ports\n")
+
+atexit.register(stop)
 

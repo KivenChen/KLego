@@ -36,6 +36,9 @@ class Position:
 		# output distance
 		return sqrt((self.x-pos.x)**2+(self.y - pos.y)**2)
 
+	def __str__(self):
+		return '%d, %d, direction: %d' % (self.x, self.y, self.d)
+
 
 class Box(Position):
 	def __init__(self, x=0, y=0, d=0, ok=True):
