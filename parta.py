@@ -24,24 +24,33 @@ def run():
     M.idle()
     M.reset_position(False)
     M.run(CRUISING_SPEED)
+    color.activate = True
     while True and not _stop:
         if black():  # hit black boundary
+            color.activate = False
             print('black')
             stop()
             b(1)
-            spin('90')
+            color.activate = True
+            color.color = 'white'
+            color.reset()  # todo: if this is a green one?
+            direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 2) // 0.01 / 100
+            spin(direction)
             M.run(CRUISING_SPEED)
 
-        if distance() <= 25 or green() and not black():  # obstacle inbound
+        if distance() <= 20 or touch.is_pressed() and not black():  # obstacle inboundd
+            color.activate = False
             stop()
             print('obstacle inbound')
             M.run(APPROACHING_SPEED)  # slow down
+            sleep(0.3)
             if green():  # bonus
                 print("bonus !!!")
                 sound()
-                b(0.5)  # go back
-                direction = random.uniform(core._to_rolls['45'], core._to_rolls['90'] * 2) // 0.01 / 100
-                spin(direction*1.5)
+                b(0.8)  # go back
+                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 2) // 0.01 / 100
+                spin(direction)
+                color.reset()
                 M.run(CRUISING_SPEED)
             else:
                 print('non bonus')
@@ -52,6 +61,8 @@ def run():
                 spin(direction)
                 print('spinned')
                 M.run(CRUISING_SPEED)
+            color.activate = True
+
 
 
 def test_parta():

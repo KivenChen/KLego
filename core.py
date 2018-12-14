@@ -168,7 +168,7 @@ def _locked(func):
         # print("unlocked")
     return output
 
-def spin(r=1.0, p=65):
+def spin(r=1.0, p=55):
     # L.reset_position(True)
     # R.reset_position(True)
     stop()
