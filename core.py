@@ -79,15 +79,21 @@ def _guard():
         global _stop
         _stop = True
         stop()
+        sleep(2)
         import sys
         sys.exit()
 
     def stopper():
         global _stop
-        _stop = True
-        stop()
-        sleep(0.5)
-        _stop = False
+
+        def work():
+            _stop = True
+            stop()
+            sleep(5)
+            _stop = False
+
+        Thread(target=work).start()
+
     button1 = tk.Button(window, text='stop', command=stopper)
     button2 = tk.Button(window, text='terminate', command=exiter)
     button1.pack()
@@ -147,6 +153,7 @@ def _r(p=100, r=1, t=None, b=True):
         r *= 360
     R.turn(p, r, b)
 
+
 def _locked(func):
     def output(*args):
         global _lock
@@ -161,7 +168,7 @@ def _locked(func):
         # print("unlocked")
     return output
 
-def spin(r=1.0, p=75):
+def spin(r=1.0, p=65):
     # L.reset_position(True)
     # R.reset_position(True)
     stop()
@@ -316,7 +323,7 @@ def calibrate_light_by_black():
     _LIGHT_BASE_ = light.get_lightness() - 10
 
 def sound():
-    Thread(target=brick.play_tone_and_wait, args=(3, 1000)).start()
+    Thread(target=brick.play_tone_and_wait, args=(784, 500)).start()
 
 def reset(remote=False):
     global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch, _LIGHT_BASE_, color

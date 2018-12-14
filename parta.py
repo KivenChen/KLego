@@ -9,43 +9,49 @@ from sys import exit
 from core import _stop
 
 atexit.register(stop)
+CRUISING_SPEED = 70
+APPROACHING_SPEED = 55
+
+
 
 def test():
-    M.run(80)
+    M.run(CRUISING_SPEED)
     sleep(1)
     b(1)
+
 
 def run():
     M.idle()
     M.reset_position(False)
-    M.run(80)
+    M.run(CRUISING_SPEED)
     while True and not _stop:
         if black():  # hit black boundary
             print('black')
             stop()
-            r(1.5)
+            b(1)
+            spin('90')
+            M.run(CRUISING_SPEED)
 
-        if distance() <= 19 or green() and not black():  # obstacle inbound
-            print('distance or green')
-            M.run(65)  # slow down
-            print('slowed down')
+        if distance() <= 25 or green() and not black():  # obstacle inbound
+            stop()
+            print('obstacle inbound')
+            M.run(APPROACHING_SPEED)  # slow down
             if green():  # bonus
-                while not hit():
-                    pass
                 print("bonus !!!")
+                sound()
                 b(0.5)  # go back
-                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3) // 0.01 / 100
-                r(direction*1.5)
-                M.run(80)
+                direction = random.uniform(core._to_rolls['45'], core._to_rolls['90'] * 2) // 0.01 / 100
+                spin(direction*1.5)
+                M.run(CRUISING_SPEED)
             else:
                 print('non bonus')
                 b(0.5, p=120)
                 print("non-bonus, turning back")
                 print("about to spin")
-                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3) // 0.01 / 100
-                r(1.5)
+                direction = random.uniform(core._to_rolls['45'], core._to_rolls['90'] * 2) // 0.01 / 100
+                spin(direction)
                 print('spinned')
-                M.run(80)
+                M.run(CRUISING_SPEED)
 
 
 def test_parta():
