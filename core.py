@@ -2,15 +2,14 @@
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
-import nxt
 import atexit
 from nxt.sensor import *
 from time import sleep
 from threading import Thread
 
 
-_GREEN_BLACK_BOUNDARY_ = 15  # todo: adapt these two values
-_GREEN_WHITE_BOUNDARY_ = 30
+_GREEN_BLACK_BOUNDARY_ = 20  # todo: adapt these two values
+_GREEN_WHITE_BOUNDARY_ = 130
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -46,11 +45,11 @@ _degree_to_spin_r = _to_rolls = \
     '90': 0.51,
     '45': 0.26,
     '30': 0.11,
-    '15': 0.85,
+    '15': 0.085,
     '-90': -0.52,
     '-45': -0.265,
     '-30': -0.173,
-    '-15': -0.086
+    '-15': -0.086,
 }
 
 
@@ -95,7 +94,7 @@ def r(r=1, p=75, t=None, b=True):
 right = r
 
 
-def _l(r=1, p=100, t=None, b=True):  # changed the rule
+def _l(r=1.0, p=100, t=None, b=True):  # changed the rule
     if r < 15:  # todo: say this in the documentation
         r *= 360
     L.turn(p, r, b)
@@ -106,10 +105,25 @@ def _r(p=100, r=1, t=None, b=True):
         r *= 360
     R.turn(p, r, b)
 
+def _locked(func):
+    def output(*args):
+        global _lock
+        # print("locked")
+        _lock = True
+        try:
+            func(*args)
+        except Exception as e:
+            print e.message
+        finally:
+            _lock = False
+        # print("unlocked")
+    return output
 
-def spin(r=1, p=75):
-    L.reset_position(True)
-    R.reset_position(True)
+def spin(r=1.0, p=75):
+    # L.reset_position(True)
+    # R.reset_position(True)
+    stop()
+    M.idle()
     sleep(0.1)
     global _lock
     if type(r) == str:
@@ -124,21 +138,9 @@ def spin(r=1, p=75):
     op1.start()
     op2.start()
     while _lock:
-        pass
-    stop()
+      pass
     return L.get_tacho().tacho_count, R.get_tacho().tacho_count
     # print("exit turn")
-
-
-def _locked(func):
-    def output(*args):
-        global _lock
-        # print("locked")
-        _lock = True
-        func(*args)
-        _lock = False
-        # print("unlocked")
-    return output
 
 
 def hold_on():
@@ -179,13 +181,12 @@ def _continuous_track():
         pos.track(0, to_cm(now-prev))
         prev = now
 
+
 def f(r=1, p=75, t=None):
     global _lock
     # pos.track(0, to_cm(r))
     if not r or r==0:  # unlimited
         M.run(p)
-        work = Thread(target=_continuous_track)
-        work.run()
     else:
         M.turn(p, r if r >= 15 else r*360, False)
         M.brake()
@@ -312,10 +313,7 @@ try:
     reset()
 except locator.BrickNotFoundError:
     print("\nswitching connection")
-    try:
-        reset(True)
-    except:
-        print("\nrefreshing ports\n")
+    reset(True)
 
 atexit.register(stop)
 
