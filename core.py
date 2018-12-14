@@ -6,10 +6,22 @@ import atexit
 from nxt.sensor import *
 from time import sleep
 from threading import Thread
+from color_util import *
+import tkinter as tk
+from tkinter import Tk
+from multiprocessing import Process
+import multiprocessing as mp
 
+_GREEN_BLACK_BOUNDARY_ = 100  # todo: adapt these two values
+_GREEN_WHITE_BOUNDARY_ = 250
 
-_GREEN_BLACK_BOUNDARY_ = 20  # todo: adapt these two values
-_GREEN_WHITE_BOUNDARY_ = 130
+def gw(val):
+    global _GREEN_WHITE_BOUNDARY_
+    _GREEN_WHITE_BOUNDARY_ = val
+
+def gb(val):
+    global _GREEN_BLACK_BOUNDARY_
+    _GREEN_BLACK_BOUNDARY_ = val
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -27,6 +39,7 @@ lmove = Thread()
 rmove = Thread()
 M = None
 _lock = False
+_stop = False
 light = None
 sonic = None
 touch = None
@@ -35,6 +48,7 @@ _debug = True
 _TURN_RATIO_ = 1
 _LIGHT_BASE_ = 12
 _CM_EACH_ROLL_ = 0
+color = None
 
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
@@ -52,9 +66,37 @@ _degree_to_spin_r = _to_rolls = \
     '-15': -0.086,
 }
 
+''' this file is to be run separately
+'''
+
+from tkinter import Tk
+import tkinter as tk
+
 
 def _guard():
-    pass
+    window = Tk()
+    def exiter():
+        global _stop
+        _stop = True
+        stop()
+        import sys
+        sys.exit()
+
+    def stopper():
+        global _stop
+        _stop = True
+        stop()
+        sleep(0.5)
+        _stop = False
+    button1 = tk.Button(window, text='stop', command=stopper)
+    button2 = tk.Button(window, text='terminate', command=exiter)
+    button1.pack()
+    button2.pack()
+    window.mainloop()
+
+
+def get_guard():
+    return Thread(target=_guard)
 
 
 def to_cm(r):
@@ -205,9 +247,11 @@ def _test():
 def stop():
     L.brake()
     R.brake()
+    M.brake()
     sleep(0.2)
     L.idle()
     R.idle()
+    M.idle()
 
 
 def _discover(boxes, pos, sonic_dist):
@@ -250,22 +294,18 @@ def distance():
     return sonic.get_distance()
 
 
-def green():
-    if _GREEN_WHITE_BOUNDARY_ > brightness() > _GREEN_BLACK_BOUNDARY_:
-        return True
-    return False
+def green():  # this one needs verification
+    if color('green'):
+        sleep(0.2)
+    return color('green')
 
 
 def black():
-    if brightness() < _GREEN_BLACK_BOUNDARY_:
-        return True
-    return False
+    return color('black')
 
 
 def white():
-    if brightness() > _GREEN_WHITE_BOUNDARY_:
-        return True
-    return False
+    return color('white')
 
 
 def hit():
@@ -279,7 +319,7 @@ def sound():
     Thread(target=brick.play_tone_and_wait, args=(3, 1000)).start()
 
 def reset(remote=False):
-    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch, _LIGHT_BASE_
+    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch, _LIGHT_BASE_, color
     try:
         locator.read_config()
     except:
@@ -300,6 +340,7 @@ def reset(remote=False):
     light = Light(brick, PORT_3)
     sonic = Ultrasonic(brick, PORT_2)
     touch = Touch(brick, PORT_4)
+    color = Color(light)
 
     # calibrate light sensor
     light.set_illuminated(True)

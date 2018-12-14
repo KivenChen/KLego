@@ -3,6 +3,11 @@ from core import spin as spin
 import core
 import random
 import atexit
+from tkinter import Tk
+import tkinter as tk
+from sys import exit
+from core import _stop
+
 atexit.register(stop)
 
 def test():
@@ -11,38 +16,47 @@ def test():
     b(1)
 
 def run():
-    while True:
-        M.run(80)
+    M.idle()
+    M.reset_position(False)
+    M.run(80)
+    while True and not _stop:
         if black():  # hit black boundary
-            b(1)
-            spin('90')
-            spin('90')
+            print('black')
+            stop()
+            r(1.5)
 
-        if distance() <= 20:  # obstacle inbound
-            M.run(65)
-            if green() and False:  # bonus
+        if distance() <= 19 or green() and not black():  # obstacle inbound
+            print('distance or green')
+            M.run(65)  # slow down
+            print('slowed down')
+            if green():  # bonus
                 while not hit():
                     pass
-                stop()
                 print("bonus !!!")
-                b(1)  # go back
-                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3)
-                direction = direction // 0.01 / 100
-                spin(r=direction)
+                b(0.5)  # go back
+                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3) // 0.01 / 100
+                r(direction*1.5)
+                M.run(80)
             else:
-                b(1)
-                stop()
+                print('non bonus')
+                b(0.5, p=120)
                 print("non-bonus, turning back")
-                sleep(0.2)
                 print("about to spin")
-                # direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3)
-                # direction = direction // 0.01 / 100
-                spin(0.9)
+                direction = random.uniform(core._to_rolls['90'], core._to_rolls['90'] * 3) // 0.01 / 100
+                r(1.5)
                 print('spinned')
+                M.run(80)
 
-try:
-    test()
-except Exception as e:
-    print(e.message)
-finally:
-    stop()
+
+def test_parta():
+    try:
+        print('guard: in progress')
+        get_guard().start()
+        run()
+    except Exception as e:
+        print(e.message)
+    finally:
+        stop()
+
+if __name__ == "__main__":
+    test_parta()
