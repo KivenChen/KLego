@@ -1,4 +1,5 @@
 from math import sin, sqrt, cos, radians as rad
+from core import * # todo: delete this line!!!
 
 '''
 this file provides the utilities for tracking robot and boxes locations
@@ -18,13 +19,21 @@ class Position:
 		self.d = d
 		self.accurate = True
 	
-	def track(self, d_delta, dpm, continuous=False):
+	def track_continuously(sync_motor):
+		sync_motor.reset_position(True)
+		sync_motor.reset_position(False)
+		
+		def sync_work(s_motor):
+			while s_motor._get_new_state().power != 0:  # unstopped
+				sync_motor = 
+				sync_motor.get_Tacho
+				
+	
+	def track(self, d_delta, dpm):
 		# tracks the position change
 		# d_delta: the change of direction clockwise
 		# dpm: the displacement x
 		# continuous: handle f() and b() separately
-		if continuous:
-			pass
 		self.d += d_delta
 		dx = dpm * sin(rad(self.d))
 		dy = dpm * cos(rad(self.d))
@@ -74,6 +83,7 @@ class Boxes(list):
 			if box.dist(target_pos) <= threshold:
 				return True
 		return False
+
 
 
 
