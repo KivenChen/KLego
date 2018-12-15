@@ -13,7 +13,6 @@ kLego is a minimalist yet powerful framework for controlling Lego Mindstorm NXT,
 - 基于 Python 2.7 （Python 3 目前无法使用前进/后退功能）
 - 目前只有 NXT 支持
 - 基于 nxt-python 模块
-- 连接需要 pyusb 以及 pybluez 模块
 
 ## V0.98 更新
 - 极简安装方式：只需要 Python 2.7 和以下命令即可成功部署：`pip install klego`
