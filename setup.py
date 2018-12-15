@@ -8,7 +8,7 @@ TO_EXCLUDE = ['pybluez']
 setup(
     # to be displayed on PyPI
     name='klego',
-    version='0.95',
+    version='0.95b0',
     description='the beta v0.95 version of klego, an easy-to-go'
                 ' python package for Lego NXT control'
                 ' built especially for popular Lego tasks'
@@ -24,6 +24,7 @@ setup(
     url='https://kivenchen,us',
 
     packages=[i for i in find_packages() if i not in TO_EXCLUDE],
+    install_requires=['pyusb'],
     zip_safe=False,
     test_suite='nose.collector',
     tests_require=['nose'],

@@ -1,3 +1,6 @@
+include *.py
+recursive-include .\ *.py
+
 exclude A.py
 exclude test.py
 exclude calibrate.py
@@ -5,8 +8,7 @@ exclude *.icloud
 exclude .gitignore
 exclude *.exe
 
-graft pybluez-master
-graft pyusb-1.0.0a2
+graft pybluez
 
 prune nxt
 prune .idea
