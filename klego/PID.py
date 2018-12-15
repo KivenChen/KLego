@@ -10,6 +10,7 @@ class PID_Controller:
 		self.ki = 100
 		self.kd = 10000
 		self._debug = False
+		self.offset = (core.GREEN_BLACK_BOUNDARY + core.GREEN_WHITE_BOUNDARY) / 2
 
 	def run(self):
 		# tunable parameters

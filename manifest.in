@@ -2,7 +2,7 @@ include *.py
 include readme.md
 include requirements.txt
 
-recursive-include klego *
+recursive-include klego *.py
 
 prune pybluez
 prune rl

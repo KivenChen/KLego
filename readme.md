@@ -1,20 +1,34 @@
-# PyLego 使用指南
+# kLego User Guide
 
+kLego is a minimalist yet powerful framework for controlling Lego Mindstorm NXT, designed for common Lego tasks like line-following and bonus block hitting. Now it has come out on [PyPI](https://pypi.org/project/klego/) so you can **install it with just one line of command.**
 
+## Why kLego?
 
-- **不用搭积木**
-- 不用绕 Data Wire
-- **前进、转弯都可以在 3 个字符内**
-- 为什么不用 Python 来写乐高呢？
+项目的作者 [Kiven](https://kivenchen.us/about-me) 对学校 Lego Assignment 感到厌烦，希望能反抗 Lego Mindstorm NXT 图形化编程的暴政，同时希望尝试一个关于硬件的开源项目，因此开发了 kLego （原名 PyLego）。
 
-
+出于 Python 易用、灵活，且第三方模块相当丰富，kLego 基于 Python 2.7 打造。
 
 ## 概述
 
 - 基于 Python 2.7 （Python 3 目前无法使用前进/后退功能）
 - 目前只有 NXT 支持
-- 基于 nxt-python 
+- 基于 nxt-python 模块
 - 连接需要 pyusb 以及 pybluez 模块
+
+## V0.98 更新
+- 极简安装方式：只需要 Python 2.7 和以下命令即可成功部署：`pip install klego`
+    - （USB 连接的启用见安装说明）
+    - （蓝牙连接的启用见安装说明）
+- 全新 **color** 组件：
+    - 集成颜色变化的实时追踪和判断
+    - 使用动态监测算法，无视环境光的影响
+- 全新 **dist**组件：
+    - 调用`dist.danger` 即可知障碍物是否足够近*，为 Bonus Block 任务专门优化
+    - 使用动态检测算法，`dist.danger` 在侧面接近障碍物时依然有效
+    - *（离超声波 5 - 10 cm 以内为足够近）
+- 新增**guard_window**：小窗口工具，可以随时停止机器人进行下一步，或终止程序
+- 新增**光感 PID**模块：为 Line-Following Task 的调试专门优化
+- 新增对**摇摆声纳**的支持：默认该马达在 A 接口
 
 ## V0.91 更新
 
@@ -36,33 +50,51 @@
 - （**目前(2018-12-10)的 `t` 参数暂未提供支持**）
 
 ## 安装
-项目中有已经有需要的环境（Windows），但因为有一些细节工作，所以提供第三方教程[教程]: -https://blog.xuezhonghao.com/2018/08/16/nxt-python.html 
+~~项目中有已经有需要的环境（Windows），但因为有一些细节工作，所以提供第三方教程[教程]: -~~
+现在可以使用 `pip` 方式安装：
 
-### 安装第三方库
 
-#### 连接相关
 
-- Windows: (**修复蓝牙模块的安装问题**) 从以下链接下载并安装 VC 9.0 Compiler for Python
-  - https://www.microsoft.com/en-us/download/details.aspx?id=44266
+### 安装 Python
+- Windows: 下载 [Python 2.7](https://www.python.org/ftp/python/2.7.15/python-2.7.15.amd64.msi)
+    - 请确保 Add python.exe to Path 选中第二项状态
+    - ![记得选中把如下选项更改到第二项](C:\Users\java1\Pictures\python installation.png)
+- Mac：系统自带 Python 2.7
 
-- Windows: 项目中有你需要的部分第三方库(**为确保稳定性，请使用 v0.91 最新版提供的安装文件**)，在命令行中分别进入 `pyusb` 以及 `pybluez` 文件夹，并运行 `python setup.py install`
-- Mac: 请参考上述教程
+### 安装  kLego
 
-#### 内核相关
+在 Windows 的 cmd 或者 macOS 的 terminal 命令行中执行以下命令安装 **kLego**：
 
-- Windows：在 cmd 命令行运行：`pip install threading`
-- Mac：在 terminal 中运行：`sudo pip install threading` （需要权限）
+```
+pip install klego
+```
 
-### 配置驱动
-- Windows: 按照上述教程配置 USB 驱动，把乐高驱动换成 libusb-win32
-- Mac：安装 libusb
-- （~~测试版目前仅支持 USB 调试~~。试验性蓝牙模块已经加入）
 
-### 导入模块
-- 以下2个步骤都可以
-    1. 把 nxt 文件夹放入你正在写的 python 项目文件夹
-    2. 命令行执行 `pip install nxt-python` 
-- 把 core.py 以及 放在你正在写的 python 项目文件夹里面
+
+### 配置连接
+
+- Windows: 
+    - USB：请跟随教程配置 libusb 驱动
+    - 蓝牙：从以下链接下载并安装 [VC 9.0 Compiler for Python](https://www.microsoft.com/en-us/download/details.aspx?id=44266)，并在命令行执行 `pip install pybluez-win10`
+
+- Mac: 
+
+    - USB：打开 Terminal 终端，复制粘贴以下两行命令并运行（需要输入密码给予权限）
+        - ```
+            sudo ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
+            
+            sudo brew install libusb
+            ```
+
+    - 蓝牙：打开 Terminal 终端，复制粘贴以下命令并运行（需要输入密码给予权限）
+
+        - ```
+              sudo easy_install -U pyobjc-core
+              sudo easy_install -U pyobjc
+              pip install pybluez
+            ```
+
+        - （据报告，Mac 的蓝牙连接配置有出错的可能）
 
 
 ## 开始
@@ -78,9 +110,12 @@ from core import *
 ``` python
  L-Motor: PORT_B
  R-Motor: PORT_C
+ Sonar-Base-Motor: PORT_A
+
  Light(PORT_3)
  Ultrasonic(PORT_2)
  Touch(PORT_4)
+ 
 ```
 
 ## 关于函数的设计
@@ -92,7 +127,7 @@ from core import *
 
 ## 运动类函数
 
-### `l(r=1, p=75, t=None, b=True)`
+### **l(r=1, t=None, p=75)**
 
 ---
 
@@ -102,11 +137,8 @@ from core import *
 - `r`：转动的距离(rolls)。（**如果 `t` 被修改，那么`r`的值作废！**）
     - 如果 `r` **>=30**，会被认为是**轮子转动的角度(degree)**。比如 `r=360` 就是让右轮旋转360度（正好一圈），于是左转
     - 否则，会被认为是**轮子转动的圈数(circles of rotation)**
-- `t`：转动的时间。（**如果 `t` 被修改，那么`r`的值作废！**）**目前(2018-12-10)的 `t` 参数暂未提供支持，下同**
+- `t`：转动的时间。（**如果 `t` 被修改，那么`r`的值作废！**）
      - 单位：秒
-- `b`: 即 break, 是否转完马上刹车
-    - 只能是 True 或者 False
-    - 默认值 True
 
 
 #### 例子
@@ -118,13 +150,13 @@ l(r=45) # 右轮转45度
 l(t=10) # 右轮转10秒
 ```
 
-### `r(r=1, p=75, t=None, b=True)`
+### **r(r=1, p=75, t=None)**
 
 ---
 
 右转的函数。请参考 `l` 的说明
 
-### `spin(r=1, p=75)`
+### **spin(r=1, t=None, p=75)**
 
 ---
 
@@ -132,7 +164,7 @@ l(t=10) # 右轮转10秒
 参数请参考上面的函数
 
 
-### `f(r=1, p=75, t=None)`
+### **f(r=1, t=None, p=75)**
 
 ---
 
@@ -179,54 +211,48 @@ f(None) # 一直前进直到 stop 被调用
 
 ---
 
-发出声音**（尚不稳定）**
+发出声音
 
 
-### `hold_on()`
-
----
-
-挂机专用，防止乐高圣殿关机
 
 
 ## 传感类函数
 
-### `distance() -> int`
+### **dist() -> int**
 
 ---
 
 获取一个整数：即超声波传感器的读数
 单位 **cm**
 
-### `brightness() -> int`
+### **brightness() -> int**
 
 ---
 
 获取一个整数：光传感器的读数
 区间：0 ~ 100
 
-### `hit()`
+### **color()**
 
 ---
 
-判断是否撞到物体（**传感器被按下，或者是距离<5cm**）
-返回值:
-- True：是的，撞到了
-- False： 不，~
+返回值为字符串：'black', 'white' 或者 'green'
 
-### `black() -> bool`
+
+
+### **black() -> bool**
 
 ---
 
 判断地面是否为黑色。是则返回 True，否则 False。
 
-### `green() -> bool`
+### **green() -> bool**
 
 ---
 
 判断地面是否是绿色。参考上一个
 
-### `white() -> bool`
+### **white() -> bool**
 
 ---
 
@@ -284,22 +310,34 @@ pos.dist(boxes[0])  # 和第二个等价
 
 `threshold`：默认如果距离小于 **14 cm** 即重叠
 
-### core 中集成的函数
 
-#### **discover(boxes)**
+
+### 距离模块的使用
+
+klego 集成了 dist 对象，可以作为函数访问获取距离，也可以访问其成员变量，检查是否危险
+
+#### dist.danger
 
 ---
 
-**v0.91 更新：将 discover 从 boxes 类的成员函数转为 core 模块的静态函数**
+布尔值的变量，判断是否离障碍物过近
 
-控制机器人旋转360度，并记录各个方向上的块。此函数会过滤重复检测的结果。
+### **guard_window**
 
-### 定位模块的例子：一个流程
-``` python
-while True:
-	discover(boxes)  # 检测物块。
-    target = boxes.nearest()  # 挑最近的，没去过的
-    '''go to the target ...'''
-    target.new = False  # 标记为已去过
+执行`guard_window()`即可获得该窗口小工具
+
+### PID 模块的使用
+
+klego 集成了 pid 控制器对象，请参照以下方式调参并运行：
+
+```
+import klego
+
+pid.kp = ...
+pid.ki = ...
+pid.kd = ...
+pid.offset = ...
+
+pid.run()
 ```
 
