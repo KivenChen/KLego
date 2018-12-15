@@ -70,10 +70,10 @@ pip install klego
 
 
 
-### 配置连接
+### 配置连接方式
 
 - Windows: 
-    - USB：请跟随教程配置 libusb 驱动
+    - USB：安装 libusb 驱动，过程见搜索引擎
     - 蓝牙：从以下链接下载并安装 [VC 9.0 Compiler for Python](https://www.microsoft.com/en-us/download/details.aspx?id=44266)，并在命令行执行 `pip install pybluez-win10`
 
 - Mac: 
@@ -90,7 +90,7 @@ pip install klego
         - ```
               sudo easy_install -U pyobjc-core
               sudo easy_install -U pyobjc
-              pip install pybluez
+              sudo pip install pybluez
             ```
 
         - （据报告，Mac 的蓝牙连接配置有出错的可能）
@@ -98,10 +98,10 @@ pip install klego
 
 ## 开始
 
-输入以下语句即可食用以下提及的所有函数
+输入以下语句即可直接食用以下提及的所有函数及组件
 
 ``` python
-from core import *
+import klego
 ```
 
 以下是默认使用的接口，如果你想改动请到 `core.py` 的 `reset()`中更改，第一次导入 `core` 模块时都会调用这个函数进行初始化。如果不想改程序，请改造你的乐高机器人。
