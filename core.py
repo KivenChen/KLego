@@ -7,13 +7,20 @@ from nxt.sensor import *
 from time import sleep
 from threading import Thread
 from color_util import *
+from dist_utils import *
 import tkinter as tk
 from tkinter import Tk
 from multiprocessing import Process
 import multiprocessing as mp
 
+# tunable parameters
 _GREEN_BLACK_BOUNDARY_ = 100  # todo: adapt these two values
 _GREEN_WHITE_BOUNDARY_ = 250
+_debug = True
+_TURN_RATIO_ = 1
+_LIGHT_BASE_ = 12
+_CM_EACH_ROLL_ = 0
+_illuminate = True
 
 def gw(val):
     global _GREEN_WHITE_BOUNDARY_
@@ -31,12 +38,9 @@ print("Copyright - Kiven, 2018")
 # they are not supposed to be invoked by any users (for details please google or baidu it)
 # and the author will not be responsible for any mistakes caused by this
 
-
 brick = None
 L = None
 R = None
-lmove = Thread()
-rmove = Thread()
 M = None
 _lock = False
 _stop = False
@@ -44,12 +48,8 @@ light = None
 sonic = None
 touch = None
 guard_process = True
-_debug = True
-_TURN_RATIO_ = 1
-_LIGHT_BASE_ = 12
-_CM_EACH_ROLL_ = 0
 color = None
-
+dist = None
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
 
@@ -172,7 +172,7 @@ def spin(r=1.0, p=55):
     # L.reset_position(True)
     # R.reset_position(True)
     stop()
-    M.idle()
+    # M.idle()
     sleep(0.1)
     global _lock
     if type(r) == str:
@@ -188,6 +188,7 @@ def spin(r=1.0, p=55):
     op2.start()
     while _lock:
       pass
+    stop()
     return L.get_tacho().tacho_count, R.get_tacho().tacho_count
     # print("exit turn")
 
@@ -298,7 +299,7 @@ def brightness():
 
 
 def distance():
-    return sonic.get_distance()
+    return dist.val
 
 
 def green():  # this one needs verification
@@ -348,10 +349,13 @@ def reset(remote=False):
     sonic = Ultrasonic(brick, PORT_2)
     touch = Touch(brick, PORT_4)
     color = Color(light)
+    global dist
+    dist = Distance(sonic)
 
     # calibrate light sensor
     light.set_illuminated(True)
-    light.set_illuminated(False)
+    if not _illuminate:
+        light.set_illuminated(False)
     sleep(0.5)
     # _LIGHT_BASE_ = brightness() - 10
     print("Initialization completed\n")
