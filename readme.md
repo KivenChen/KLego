@@ -57,13 +57,12 @@ kLego is a minimalist yet powerful framework for controlling Lego Mindstorm NXT,
 
 ### 安装 Python
 - Windows: 下载 [Python 2.7](https://www.python.org/ftp/python/2.7.15/python-2.7.15.amd64.msi)
-    - 请确保 Add python.exe to Path 选中第二项状态
-    - ![记得选中把如下选项更改到第二项](C:\Users\java1\Pictures\python installation.png)
+    - **Please ensure that when the installation asks you to select components to install，`Add python.exe to Path` at the bottom of the list is selected instead of showing a red cross**
 - Mac：系统自带 Python 2.7
 
 ### 安装  kLego
 
-在 Windows 的 cmd 或者 macOS 的 terminal 命令行中执行以下命令安装 **kLego**：
+在 Windows 的 cmd 或者 macOS 的 terminal 命令行中执行以下命令，安装 **kLego**：
 
 ```
 pip install klego
