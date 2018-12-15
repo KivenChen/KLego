@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     # to be displayed on PyPI
     name='klego',
-    version='0.98.2.4',
+    version='0.98.2.5',
     description='An easy-to-go, yet specific and powerful'
                 ' python package for Lego NXT',
     long_description='An easy-to-go'
