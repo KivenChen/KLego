@@ -154,12 +154,12 @@ else:
                     % sys.platform)
 
 
-setup(name='PyBluez',
+setup(name='PyBluez-win10',
       version='0.22',
-      description='Bluetooth Python extension module',
+      description='Bluetooth Python extension module modified by Kiven for win10 compatibility',
       author="Albert Huang",
       author_email="ashuang@alum.mit.edu",
-      url="http://pybluez.github.io/",
+      url="http://pybluez.github.io",
       ext_modules=ext_modules,
       packages=packages,
 # for the python cheese shop
@@ -172,8 +172,9 @@ setup(name='PyBluez',
       download_url='https://github.com/pybluez/pybluez',
       long_description='Bluetooth Python extension module to allow Python "\
                 "developers to use system Bluetooth resources. PyBluez works "\
-                "with GNU/Linux, macOS, and Windows XP.',
-      maintainer='Piotr Karulis',
+                "with GNU/Linux, macOS, and Windows XP.'
+                       'And kiven has adapted it to be comopatible with Windows 10 ',
+      maintainer='Piotr Karulis and Kiven Chen',
       license='GPL',
       extras_require={'ble': ['gattlib==0.20150805']},
       package_dir=package_dir,

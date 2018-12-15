@@ -7,15 +7,6 @@ instead of using fixed thresholds
 from threading import Thread
 from time import sleep
 
-_debug_global = False
-_debug_color = True
-_power_ref = 0
-
-B_TO_G = 70
-G_TO_W = 90
-B_TO_W = B_TO_G + G_TO_W
-
-
 def _handle_green_separately(self):
     if self.color == 'green':
         pass
@@ -56,33 +47,33 @@ def _monitor(self):
         self.reset()
         self.now = sum(self.history[4:]) / (len(self.history)-4)
 
-        if _debug_color and abs(self.prev - self.now) > 12:
+        if self._debug_color and abs(self.prev - self.now) > 12:
             print "COLOR value change: ", self.prev, ' to ', self.now, ', now', self.color.upper()
 
         # GETTING BRIGHTER
-        if self.now - self.prev > _r*G_TO_W and self.color == 'green':
+        if self.now - self.prev > _r*self.G_TO_W and self.color == 'green':
                 self.color = 'white'
                 self.reset()
                 print "COLOR: change from GREEN 2 WHITE"
-        elif _r*B_TO_G < self.now- self.prev < _r*B_TO_W and self.color == 'black':
+        elif _r*self.B_TO_G < self.now- self.prev < _r*self.B_TO_W and self.color == 'black':
                 self.color = 'green'
                 self.reset()
                 print "COLOR: change from BLACK 2 GREEN"
-        elif _r*B_TO_W < self.now - self.prev and self.color == 'black':
+        elif _r*self.B_TO_W < self.now - self.prev and self.color == 'black':
             self.color = 'white'
             self.reset()
             print "COLOR: change from BLACK 2 WHITE"
 
         # GETTING DARKER
-        if _r*B_TO_W > self.prev - self.now > G_TO_W*_r and self.color == 'white':
+        if _r*self.B_TO_W > self.prev - self.now > self.G_TO_W*_r and self.color == 'white':
             self.color = 'green'
             self.reset()
             print("COLOR: change from WHITE 2 GREEN")
-        elif _r*B_TO_G < self.prev - self.now < _r*G_TO_W and self.color == 'green':
+        elif _r*self.B_TO_G < self.prev - self.now < _r*self.G_TO_W and self.color == 'green':
             self.color = 'black'
             self.reset()
             print("COLOR: change from GREEN 2 BLACK")
-        elif _r*B_TO_W < self.prev - self.now:
+        elif _r*self.B_TO_W < self.prev - self.now:
             if self.color == 'white':
                 self.color = 'black'
                 self.reset()
@@ -96,6 +87,14 @@ class Color:
         self.now = sensor.get_lightness()
         self.color = calibrate_by
         self.activate = True
+
+        self._debug_global = False
+        self._debug_color = True
+
+        self.B_TO_G = 70
+        self.G_TO_W = 90
+        self.B_TO_W = self.B_TO_G + self.G_TO_W
+
         work = Thread(target=_monitor, args=(self,))
         work.start()
 

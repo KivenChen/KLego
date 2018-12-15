@@ -1,4 +1,5 @@
 # Copyright - Kiven, 2018
+
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
@@ -8,22 +9,29 @@ from time import sleep
 from threading import Thread
 from color_utils import *
 from dist_utils import *
-import tkinter as tk
-from tkinter import Tk
-
+from PID import *
+from guard import *
+# dev ops
+_debug = True
+_guard = False
 
 # tunable parameters
 GREEN_BLACK_BOUNDARY = 100  # deprecated
-GREEN_WHITE_BOUNDARY = 250
-_debug = True
+GREEN_WHITE_BOUNDARY = 250  # deprecated
+
 TURN_RATIO = 1
 LIGHT_BASE = 12
 CM_EACH_ROLL = 0
-_illuminate = True
+LIGHT_SENSOR_ILLUMINATED = True
+
 RADAR_BASE_INIT = 0.15
 RADAR_BASE_PERIODIC = 0.3
 RADAR_BASE_POWER = 100
 
+# todo: test it out
+_degree_to_seconds = to_secs = {
+
+}
 _degree_to_spin_r = to_rolls = \
 {
     '90': 0.51,
@@ -36,20 +44,12 @@ _degree_to_spin_r = to_rolls = \
     '-15': -0.086,
 }
 
-def gw(val):  # deprecated
-    global GREEN_WHITE_BOUNDARY
-    GREEN_WHITE_BOUNDARY = val
 
+print("kLego initializing.")
+print("Powered by Kiven - 2018\n")
 
-def gb(val):  # deprecated
-    global GREEN_BLACK_BOUNDARY
-    GREEN_BLACK_BOUNDARY = val
-
-print("PyLego initializing.")
-print("Copyright - Kiven, 2018")
-
-# initializing fields.
-# P.S. *private* fields and functions begin with '_',
+# initializing protected fields and protected functions
+# Protected fields and functions begin with '_',
 # they are not supposed to be invoked by any users (for details please google or baidu it)
 # and the author will not be responsible for any mistakes caused by this
 
@@ -63,99 +63,38 @@ _stop = False
 light = None
 sonic = None
 touch = None
-guard_process = True
 color = None
 dist = None
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
-
+pid = PID_Controller()
 
 ''' this file is to be run separately
 '''
 
-from tkinter import Tk
-import tkinter as tk
+
+def _handle_radar_base(motor):
+    motor.turn(RADAR_BASE_POWER, RADAR_BASE_INIT)
+
+    def _run(motor):
+        while True and not _stop:
+            motor.turn(-RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
+            motor.turn(RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
+
+    Thread(target=_run, args=(motor,)).start()
 
 
-def _guard():
-    window = Tk()
-    def exiter():
-        global _stop
-        _stop = True
-        stop()
-        sleep(2)
-        import sys
-        sys.exit()
-
-    def stopper():
-        global _stop
-
-        def work():
-            _stop = True
-            stop()
-            sleep(5)
-            _stop = False
-
-        Thread(target=work).start()
-
-    button1 = tk.Button(window, text='stop', command=stopper)
-    button2 = tk.Button(window, text='terminate', command=exiter)
-    button1.pack()
-    button2.pack()
-    window.mainloop()
+def _get_counts(motor=None):
+    if motor is None:
+        motor = M
+        return motor.get_tacho().leader_tacho.tacho_count, motor.get_tacho().follower_tacho.tacho_count
+    return motor.get_tacho().tacho_count
 
 
-def get_guard():
-    return Thread(target=_guard)
-
-
-def to_cm(r):
-    # this converts the roll param to centimeters
-    if r > 15:  # todo: complete this
-        r /= 360
-    return r * CM_EACH_ROLL
-
-
-
-
-'''
-def _handle_threads():
-    def _do():
-        global kill
-        kill = True
-        sleep(0.1)
-        kill = False
-    Thread(target=_do()).run()
-'''
-
-
-def l(r=1, p=75, t=None, b=True):  # changed the rule
-    sleep(0.2)
-    if r < 15:
-        r *= 360
-    L.turn(p, r, b)
-
-
-def r(r=1, p=75, t=None, b=True):
-    sleep(0.2)
-    if r < 15:
-        r *= 360
-    R.turn(p, r, b)
-
-
-right = r
-
-
-def _l(r=1.0, p=100, t=None, b=True):  # changed the rule
-    if r < 15:  # todo: say this in the documentation
-        r *= 360
-    L.turn(p, r, b)
-
-
-def _r(p=100, r=1, t=None, b=True):
-    if r < 15:  # todo: say this in the documentation
-        r *= 360
-    R.turn(p, r, b)
+def _wait():
+    global _stop
+    while _stop:
+        sleep(0.001)
 
 
 def _locked(func):
@@ -173,16 +112,54 @@ def _locked(func):
     return output
 
 
-def spin(r=1.0, p=55):
-    # L.reset_position(True)
-    # R.reset_position(True)
+def _timed(func, t):
+    pass
+
+
+def to_cm(r):
+    # this converts the roll param to centimeters
+    if r > 15:  # todo: complete this
+        r /= 360
+    return r * CM_EACH_ROLL
+
+
+def l(r=1, p=75, t=None, b=True):  # changed the rule
+    sleep(0.2)
+    if t:
+        L.run(p)
+        sleep(t)
+        stop()
+        return _get_counts(L) if _debug else None
+    if r < 15:
+        r *= 360
+    L.turn(p, r, b)
+    return _get_counts(L) if _debug else None
+
+
+def r(r=1, p=75, t=None, b=True):
+    sleep(0.2)
+    if t:
+        R.run(p)
+        sleep(t), stop()
+        return _get_counts(R) if _debug else None
+    if r < 15:
+        r *= 360
+    R.turn(p, r, b)
+    return _get_counts(R) if _debug else None
+
+
+def spin(r=1.0, t=None, p=55):
     stop()
-    # M.idle()
-    sleep(0.1)
+    # sleep(0.1)  # stabilize the motors
     global _lock
     if type(r) == str:
         pos.track(int(r), 0)
         r = to_rolls[r]
+    if t:
+        L.run(-p), R.run(p)
+        sleep(t), stop()
+        return _get_counts() if _debug else None
+
     if r < 0:
         r, p = -r, -p
     if r < 15:
@@ -194,8 +171,9 @@ def spin(r=1.0, p=55):
     while _lock:
         pass
     stop()
-    return L.get_tacho().tacho_count, R.get_tacho().tacho_count
-    # print("exit turn")
+
+    if _debug:
+        return _get_counts()
 
 
 def hold_on():
@@ -209,20 +187,14 @@ def hold_on():
         R.turn(1, 1)
 
 
-def _get_counts(motor=None):
-    if motor is None:
-        motor = M
-        return motor.get_tacho().leader_tacho.tacho_count, motor.get_tacho().follower_tacho.tacho_count
-    return motor.get_tacho().tacho_count
-
-
-_temp = 0
-
-
 def stopped(motor=None):
     if motor is None:
         motor = M
     return motor._get_new_state().power == 0
+
+
+def power(single_motor):
+    return single_motor._get_new_state().power
 
 
 def _continuous_track():
@@ -230,26 +202,44 @@ def _continuous_track():
     M.reset_position(True)
     prev, _ = _get_counts()
     while not stopped():
-        sleep(0.1)
+        sleep(0.05)
         # print("tracking")
         now, _ = 0, 0
         pos.track(0, to_cm(now-prev))
         prev = now
 
 
-def f(r=1, p=75, t=None):
+def _continuous_track_by_time(t, p):
+    # todo: a dictionary mapping p (power) to short(intervals)
+    dpm = 1
+
+    def _run(t, p):
+        while not stopped() and power(L) == power(R):  # still going straight
+            sleep(0.1)
+            pos.track(0, dpm)
+
+    Thread(target=_run, args=(t, p)).start()
+
+
+def f(r=1, t=None, p=75):
     global _lock
     # pos.track(0, to_cm(r))
+    if t:
+        M.run(p)
+        sleep(t)
+        M.brake()
+        return _get_counts() if _debug else None
     if not r or r==0:  # unlimited
         M.run(p)
     else:
         M.turn(p, r if r >= 15 else r*360, False)
         M.brake()
-    # return M.get_tacho().leader_tacho.tacho_count, M.get_tacho().follower_tacho.tacho_count
+    if _debug:
+        return _get_counts() if _debug else None
 
 
-def b(r=1, p=75, t=None):
-    f(r, -p, t)
+def b(r=1, t=None, p=75):
+    return f(r, t, -p)
 
 
 def _test():
@@ -258,6 +248,8 @@ def _test():
 
 
 def stop():
+    global _stop
+    _stop = True
     L.brake()
     R.brake()
     M.brake()
@@ -265,36 +257,7 @@ def stop():
     L.idle()
     R.idle()
     M.idle()
-
-
-def _discover(boxes, pos, sonic_dist):
-    # this method records a new block
-    # if this one is an existed one, return false
-    _DELTA_ = 0
-    if sonic_dist > 200:
-        return False
-    robo_pos = pos
-    x = robo_pos.x
-    y = robo_pos.y
-    d = robo_pos.d
-    dx = int(sin(rad(d)) * float(sonic_dist))
-    dy = int(cos(rad(d)) * float(sonic_dist))
-    t_x = x + dx
-    t_y = y + dy
-    pos = Position(t_x, t_y)
-    if boxes.overlapped(pos):
-        return False
-    else:
-        boxes.add(pos)
-        return True
-
-
-def discover(boxes):
-    # automatically rotate 360 and record every boxes detected within 200 cm
-    global pos
-    for i in range(12):
-        _discover(boxes, pos, distance())
-        spin('30')
+    _stop = False
 
 
 def brightness():  # for Task-A this is deprecated, use color() instead
@@ -333,29 +296,18 @@ def sound():
     Thread(target=brick.play_tone_and_wait, args=(1000, 500)).start()
 
 
-def _handle_radar_base(motor):
-    motor.turn(RADAR_BASE_POWER, RADAR_BASE_INIT)
-
-    def _run(motor):
-        while True and not _stop:
-            motor.turn(-RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
-            motor.turn(RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
-
-    Thread(target=_run, args=(motor,)).start()
-
-
 def reset(remote=False):
     global brick, L, R, M, radar_base, \
             light, sonic, touch, \
             LIGHT_BASE, _lock,\
             color, dist
 
-    print("CORE: Connecting")
+    print "CORE: Connecting via", 'Bluetooth. May take up to 20 seconds' if remote else 'USB'
     connect_method = locator.Method(not remote, remote)
-    brick = locator.find_one_brick(method=connect_method, debug=True)
+    brick = locator.find_one_brick(method=connect_method, debug=False)
     print("Connection to brick established\n")
 
-    print("CORE: Initializing componentss")
+    print("CORE: Initializing components")
     L = Motor(brick, PORT_B)
     R = Motor(brick, PORT_C)
     M = SynchronizedMotors(L, R, TURN_RATIO)
@@ -376,9 +328,11 @@ def reset(remote=False):
     global dist
     dist = Distance(sonic)
 
+    if _guard:
+        guard_window()
     # calibrate light sensor
     light.set_illuminated(True)
-    if not _illuminate:
+    if not LIGHT_SENSOR_ILLUMINATED:
         light.set_illuminated(False)
     sleep(0.5)
     # _LIGHT_BASE_ = brightness() - 10
@@ -388,8 +342,7 @@ def reset(remote=False):
 try:
     reset()
 except locator.BrickNotFoundError:
-    print("\nCORE: USB connection not found. Switching connection to bluetooth \n")
+    print("CORE: USB connection not found. Switching connection to bluetooth\n")
     reset(True)
 
 atexit.register(stop)
-

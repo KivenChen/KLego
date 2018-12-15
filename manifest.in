@@ -1,16 +1,14 @@
 include *.py
-recursive-include .\ *.py
+include readme.md
+include requirements.txt
+
+recursive-include klego *
+
+prune pybluez
+prune rl
+prune dist
+prune .git
+prune .idea
+prune __pycache__
 
 exclude A.py
-exclude test.py
-exclude calibrate.py
-exclude *.icloud
-exclude .gitignore
-exclude *.exe
-
-graft pybluez
-
-prune nxt
-prune .idea
-prune .git
-prune __pycache__

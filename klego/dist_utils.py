@@ -3,9 +3,6 @@
 from time import sleep
 from threading import Thread
 
-HISTORY_LEN = 10  # keep a history list of this length
-IGNORE_MOST_RECENT = 4  # a integer n. when compare the now to the prev, ignore the n most recent records
-INTERVAL = 0.02  # a float t which MUST BE > 0.01. Refresh distance every t seconds
 _debug = True  # if broadcast debug info
 
 
@@ -20,10 +17,12 @@ class Distance:
         sonic = self.sensor
         print('DIST: initializing, may take 1 more second')
         sleep(1)
-        sleep_interval = INTERVAL - 0.01  # the sonic.get_distance method takes 0.01s to run
         debug = self.debug
 
         while True:
+            sleep_interval = self.INTERVAL - 0.01  # the sonic.get_distance method takes 0.01s to run
+            if sleep_interval < 0:
+                raise ValueError("the minimum of INTERVAL is 0.01 seconds")
             sleep(sleep_interval)
             if self._lock:
                 continue
@@ -31,7 +30,7 @@ class Distance:
             self.history.pop()
             self.history.insert(0, self.now)
 
-            self.prev = sum(self.history[IGNORE_MOST_RECENT:]) / (HISTORY_LEN - IGNORE_MOST_RECENT)
+            self.prev = sum(self.history[self.IGNORE_MOST_RECENT:]) / (self.HISTORY_LEN - self.IGNORE_MOST_RECENT)
             _delta = self.now - self.prev
             _threshold = 10
 
@@ -56,14 +55,18 @@ class Distance:
         self._lock = True
         sensor = self.sensor
         self.now = sensor.get_distance()
-        self.history = [sensor.get_distance() for i in range(HISTORY_LEN)]
+        self.history = [sensor.get_distance() for i in range(self.HISTORY_LEN)]
         self._lock = False
         return self.history
 
     def __init__(self, sensor, obstacle_inbound=False):
+        self.HISTORY_LEN = 10  # keep a history list of this length
+        self.IGNORE_MOST_RECENT = 4  # a integer n. when compare the now to the prev, ignore the n most recent records
+        self.INTERVAL = 0.02  # a float t which MUST BE > 0.01. Refresh distance every t seconds
+
         self.sensor = sensor
         self.now = sensor.get_distance()
-        self.history = [sensor.get_distance() for i in range(HISTORY_LEN)]
+        self.history = [sensor.get_distance() for i in range(self.HISTORY_LEN)]
         self.danger = obstacle_inbound
         self.activate()
 

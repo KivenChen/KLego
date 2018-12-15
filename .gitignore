@@ -3,9 +3,12 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
-
+dist/
+__pycache__/
 # Other files and folders
 .settings/
+klego.egg-info
+dist/
 
 # Executables
 *.swf

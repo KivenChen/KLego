@@ -1,18 +1,17 @@
-from setuptools import setup, find_packages
-import os
-
-# install modified bluetooth module
-os.system('python pybluez\\setup.py install')
-TO_EXCLUDE = ['pybluez']
+from setuptools import setup
 
 setup(
     # to be displayed on PyPI
     name='klego',
-    version='0.95b0',
-    description='the beta v0.95 version of klego, an easy-to-go'
+    version='0.98.2.4',
+    description='An easy-to-go, yet specific and powerful'
+                ' python package for Lego NXT',
+    long_description='An easy-to-go'
                 ' python package for Lego NXT control'
                 ' built especially for popular Lego tasks'
-                ' like line-following and bonus block hitting',
+                ' like line-following, bonus block hitting.'
+                ' More feature with ML or DL might be included'
+                ' in the future as well',
     keywords='python lego nxt mindstorm easy',
     project_urls={
         'Documentation': 'https://github.com/KivenChen/PyLego',
@@ -23,8 +22,10 @@ setup(
     author_email='sdckivenchen@gmail.com',
     url='https://kivenchen,us',
 
-    packages=[i for i in find_packages() if i not in TO_EXCLUDE],
-    install_requires=['pyusb'],
+    packages=['klego'],
+    install_requires=['pyusb', 'nxt-python'],
+    dependency_links=[
+        'https://kivenchen.us/kiven-s-pybluez/PyBluez-0.22.1.tar.gz'],
     zip_safe=False,
     test_suite='nose.collector',
     tests_require=['nose'],

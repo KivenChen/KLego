@@ -2,10 +2,10 @@ from core import *
 import core
 import random
 import atexit
+
 from tkinter import Tk
 import tkinter as tk
 from sys import exit
-from core import _stop
 
 atexit.register(stop)
 
