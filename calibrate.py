@@ -12,7 +12,6 @@ def gui():
     slide_beta = tk.Scale(main, from_=0, to=40)
 
 
-
 def calibrate_task_b():
     # this method will create the thread to adjust
     pass

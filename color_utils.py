@@ -1,13 +1,16 @@
-'''to eliminate the problem of light problem,
-I decided to monitor the light
-instead of using a fix value to classif'''
+'''
+now this module maintains a color object
+by detecting how fast the brightness is changing
+instead of using fixed thresholds
+'''
+
+from threading import Thread
+from time import sleep
 
 _debug_global = False
 _debug_color = True
 _power_ref = 0
 
-from threading import Thread
-from time import sleep
 B_TO_G = 70
 G_TO_W = 90
 B_TO_W = B_TO_G + G_TO_W
@@ -20,13 +23,15 @@ def _handle_green_separately(self):
 
 def _monitor(self):
     print("COLOR: initializing, 1 second to wait")
-    sleep(1)  # well ... I'm pretty sure only ONE sec is needed actually
+    sleep(1)
+    # well ... I'm pretty sure only ONE second is needed actually
+    # because if core module is yet to be loaded, the importation will run into error
     from core import L, R
-    light = self.sensor
+
     while True:
         l_power, r_power = L._get_new_state().power, R._get_new_state().power
         _power = max((abs(l_power), abs(r_power)))
-        _r = 1
+        _r = 1  # sensitivity
 
         if self.color == 'green':
             pass
@@ -50,33 +55,33 @@ def _monitor(self):
         self.prev = sum(self.history[4:]) / (len(self.history)-4)
         self.reset()
         self.now = sum(self.history[4:]) / (len(self.history)-4)
+
         if _debug_color and abs(self.prev - self.now) > 12:
             print "COLOR value change: ", self.prev, ' to ', self.now, ', now', self.color.upper()
+
         # GETTING BRIGHTER
         if self.now - self.prev > _r*G_TO_W and self.color == 'green':
                 self.color = 'white'
                 self.reset()
-                print("COLOR: change from GREEN 2 WHITE")
+                print "COLOR: change from GREEN 2 WHITE"
         elif _r*B_TO_G < self.now- self.prev < _r*B_TO_W and self.color == 'black':
                 self.color = 'green'
                 self.reset()
-                print("COLOR: change from BLACK 2 GREEN")
+                print "COLOR: change from BLACK 2 GREEN"
         elif _r*B_TO_W < self.now - self.prev and self.color == 'black':
             self.color = 'white'
             self.reset()
-            print("COLOR: change from BLACK 2 WHITE")
+            print "COLOR: change from BLACK 2 WHITE"
 
         # GETTING DARKER
-        if _r*B_TO_W > self.prev - self.now > G_TO_W*_r:
-            if self.color == 'white':
-                self.color = 'green'
-                self.reset()
-                print("COLOR: change from WHITE 2 GREEN")
-        elif _r*B_TO_G < self.prev - self.now<_r*G_TO_W:
-            if self.color == 'green':
-                self.color = 'black'
-                self.reset()
-                print("COLOR: change from GREEN 2 BLACK")
+        if _r*B_TO_W > self.prev - self.now > G_TO_W*_r and self.color == 'white':
+            self.color = 'green'
+            self.reset()
+            print("COLOR: change from WHITE 2 GREEN")
+        elif _r*B_TO_G < self.prev - self.now < _r*G_TO_W and self.color == 'green':
+            self.color = 'black'
+            self.reset()
+            print("COLOR: change from GREEN 2 BLACK")
         elif _r*B_TO_W < self.prev - self.now:
             if self.color == 'white':
                 self.color = 'black'

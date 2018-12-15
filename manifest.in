@@ -1,0 +1,14 @@
+exclude A.py
+exclude test.py
+exclude calibrate.py
+exclude *.icloud
+exclude .gitignore
+exclude *.exe
+
+graft pybluez-master
+graft pyusb-1.0.0a2
+
+prune nxt
+prune .idea
+prune .git
+prune __pycache__

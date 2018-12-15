@@ -6,29 +6,44 @@ import atexit
 from nxt.sensor import *
 from time import sleep
 from threading import Thread
-from color_util import *
+from color_utils import *
 from dist_utils import *
 import tkinter as tk
 from tkinter import Tk
-from multiprocessing import Process
-import multiprocessing as mp
+
 
 # tunable parameters
-_GREEN_BLACK_BOUNDARY_ = 100  # todo: adapt these two values
-_GREEN_WHITE_BOUNDARY_ = 250
+GREEN_BLACK_BOUNDARY = 100  # deprecated
+GREEN_WHITE_BOUNDARY = 250
 _debug = True
-_TURN_RATIO_ = 1
-_LIGHT_BASE_ = 12
-_CM_EACH_ROLL_ = 0
+TURN_RATIO = 1
+LIGHT_BASE = 12
+CM_EACH_ROLL = 0
 _illuminate = True
+RADAR_BASE_INIT = 0.15
+RADAR_BASE_PERIODIC = 0.3
+RADAR_BASE_POWER = 100
 
-def gw(val):
-    global _GREEN_WHITE_BOUNDARY_
-    _GREEN_WHITE_BOUNDARY_ = val
+_degree_to_spin_r = to_rolls = \
+{
+    '90': 0.51,
+    '45': 0.26,
+    '30': 0.11,
+    '15': 0.085,
+    '-90': -0.52,
+    '-45': -0.265,
+    '-30': -0.173,
+    '-15': -0.086,
+}
 
-def gb(val):
-    global _GREEN_BLACK_BOUNDARY_
-    _GREEN_BLACK_BOUNDARY_ = val
+def gw(val):  # deprecated
+    global GREEN_WHITE_BOUNDARY
+    GREEN_WHITE_BOUNDARY = val
+
+
+def gb(val):  # deprecated
+    global GREEN_BLACK_BOUNDARY
+    GREEN_BLACK_BOUNDARY = val
 
 print("PyLego initializing.")
 print("Copyright - Kiven, 2018")
@@ -42,6 +57,7 @@ brick = None
 L = None
 R = None
 M = None
+Radar = None
 _lock = False
 _stop = False
 light = None
@@ -53,18 +69,6 @@ dist = None
 pos = Position()  # which marks the position of the robot
 boxes = Boxes()  # which stores all the boxes here
 
-
-_degree_to_spin_r = _to_rolls = \
-{
-    '90': 0.51,
-    '45': 0.26,
-    '30': 0.11,
-    '15': 0.085,
-    '-90': -0.52,
-    '-45': -0.265,
-    '-30': -0.173,
-    '-15': -0.086,
-}
 
 ''' this file is to be run separately
 '''
@@ -109,7 +113,7 @@ def to_cm(r):
     # this converts the roll param to centimeters
     if r > 15:  # todo: complete this
         r /= 360
-    return r*_CM_EACH_ROLL_
+    return r * CM_EACH_ROLL
 
 
 
@@ -168,6 +172,7 @@ def _locked(func):
         # print("unlocked")
     return output
 
+
 def spin(r=1.0, p=55):
     # L.reset_position(True)
     # R.reset_position(True)
@@ -177,7 +182,7 @@ def spin(r=1.0, p=55):
     global _lock
     if type(r) == str:
         pos.track(int(r), 0)
-        r = _to_rolls[r]
+        r = to_rolls[r]
     if r < 0:
         r, p = -r, -p
     if r < 15:
@@ -187,7 +192,7 @@ def spin(r=1.0, p=55):
     op1.start()
     op2.start()
     while _lock:
-      pass
+        pass
     stop()
     return L.get_tacho().tacho_count, R.get_tacho().tacho_count
     # print("exit turn")
@@ -292,14 +297,13 @@ def discover(boxes):
         spin('30')
 
 
-
-def brightness():
-    global _LIGHT_BASE_
-    return light.get_lightness()-_LIGHT_BASE_
+def brightness():  # for Task-A this is deprecated, use color() instead
+    global LIGHT_BASE
+    return light.get_lightness() - LIGHT_BASE
 
 
 def distance():
-    return dist.val
+    return dist.now
 
 
 def green():  # this one needs verification
@@ -319,31 +323,51 @@ def white():
 def hit():
     return touch.is_pressed() or distance() < 5
 
-def calibrate_light_by_black():
-    global _LIGHT_BASE_
-    _LIGHT_BASE_ = light.get_lightness() - 10
+
+def calibrate_light_by_black():  # deprecated
+    global LIGHT_BASE
+    LIGHT_BASE = light.get_lightness() - 10
+
 
 def sound():
-    Thread(target=brick.play_tone_and_wait, args=(784, 500)).start()
+    Thread(target=brick.play_tone_and_wait, args=(1000, 500)).start()
+
+
+def _handle_radar_base(motor):
+    motor.turn(RADAR_BASE_POWER, RADAR_BASE_INIT)
+
+    def _run(motor):
+        while True and not _stop:
+            motor.turn(-RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
+            motor.turn(RADAR_BASE_POWER, RADAR_BASE_PERIODIC)
+
+    Thread(target=_run, args=(motor,)).start()
+
 
 def reset(remote=False):
-    global brick, L, R, M, lmove, rmove, _lock, light, sonic, touch, _LIGHT_BASE_, color
-    try:
-        locator.read_config()
-    except:
-        locator.make_config()
-    print("Connecting")
+    global brick, L, R, M, radar_base, \
+            light, sonic, touch, \
+            LIGHT_BASE, _lock,\
+            color, dist
+
+    print("CORE: Connecting")
     connect_method = locator.Method(not remote, remote)
     brick = locator.find_one_brick(method=connect_method, debug=True)
     print("Connection to brick established\n")
 
-    print("Initializing sensors")
+    print("CORE: Initializing componentss")
     L = Motor(brick, PORT_B)
     R = Motor(brick, PORT_C)
-    L.get_tacho()
-    M = SynchronizedMotors(L, R, _TURN_RATIO_)
-    lmove = Thread()
-    rmove = Thread()
+    M = SynchronizedMotors(L, R, TURN_RATIO)
+
+    try:
+        radar_base = Motor(brick, PORT_A)
+        print("CORE: Found radar turning base")
+        _handle_radar_base(radar_base)
+    except:
+        print("CORE: Found no radar turning base connecting PORT A")
+        print("Normal Mode activated")
+
     _lock = False
     light = Light(brick, PORT_3)
     sonic = Ultrasonic(brick, PORT_2)
@@ -364,7 +388,7 @@ def reset(remote=False):
 try:
     reset()
 except locator.BrickNotFoundError:
-    print("\nswitching connection")
+    print("\nCORE: USB connection not found. Switching connection to bluetooth \n")
     reset(True)
 
 atexit.register(stop)

@@ -18,7 +18,7 @@ class Distance:
 
     def _monitor(self):
         sonic = self.sensor
-        print('DIST: initializing, may take 1 more seconds')
+        print('DIST: initializing, may take 1 more second')
         sleep(1)
         sleep_interval = INTERVAL - 0.01  # the sonic.get_distance method takes 0.01s to run
         debug = self.debug
@@ -42,7 +42,7 @@ class Distance:
                 debug("threshold set to 200")
             elif self.now < _threshold:  # approaching and heading to target
                 self.danger = True
-                debug("too close. Danger! ")
+                debug("facing object that is too close. Danger! ")
             elif self.danger and self.now > _threshold:
                 self.danger = False
                 debug("danger alert disarmed")

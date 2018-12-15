@@ -10,7 +10,7 @@ def run():
 	ki = 100
 	kd = 10000
 	interval = 0.05
-	offset = (core._GREEN_BLACK_BOUNDARY_ + core._GREEN_WHITE_BOUNDARY_)/2 - 5 # todo: mean of brightness
+	offset = (core.GREEN_BLACK_BOUNDARY + core.GREEN_WHITE_BOUNDARY) / 2 - 5 # todo: mean of brightness
 
 	# non-tunnable parameters
 	tp = 50
