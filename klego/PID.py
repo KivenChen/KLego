@@ -18,7 +18,7 @@ class PID_Controller:
 		ki = self.ki
 		kd = self.kd
 		interval = 0.05
-		offset = (core.GREEN_BLACK_BOUNDARY + core.GREEN_WHITE_BOUNDARY) / 2 - 5  # todo: mean of brightness
+		offset = self.offset  # todo: mean of brightness
 
 		# non-tunnable parameters
 		tp = 50
