@@ -62,7 +62,7 @@ kLego is a minimalist yet powerful framework for controlling Lego Mindstorm NXT,
 
 ### 安装  kLego
 
-在 Windows 的 cmd 或者 macOS 的 terminal 命令行中执行以下命令，安装 **kLego**：
+在 Windows 的 cmd 或者 macOS 的 terminal 命令行中执行以下命令。由于 kLego 现在已经在[PyPI](https://pypi.org/projects/kLego)开源， Python 会自动下载并安装安装 **kLego**：
 
 ```
 pip install klego
