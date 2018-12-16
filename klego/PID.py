@@ -19,7 +19,7 @@ class PID_Controller:
 		''' PID fundamental parameters '''
 		self.kp = 0.2  # learning rate
 		self.ki = 0.01  # integral
-		self.kd = 0.02  # derivative
+		self.kd = 0.01  # derivative
 
 		'''environmental parameters.  '''
 		self.offset = -1  # tune with calibrate_offset(), the brightness for half black, half white
@@ -89,12 +89,15 @@ class PID_Controller:
 
 		# main loop
 		while not core._stop:
+
+			'''applying PID foundamental algorithm'''
 			light = brightness()
 			error = light - offset
 			integral += error
 			deriv = error - lasterror
 			turn = kp * error + ki * integral + kd * deriv
 
+			'''applying force oscillation'''
 			if self.force_oscl > turn > 0:
 				turn = self.force_oscl
 			elif -self.force_oscl < turn < 0:
@@ -102,11 +105,14 @@ class PID_Controller:
 
 			'''NOTE: critical_gap is an experimental feature'''
 			if abs(turn) > self.critical_gap:
+				continue
 				turn = self.critical_gap if turn > 0 else - self.critical_gap
 
 			powerL = tp - turn
 			powerR = tp + turn
 			print powerL, ' ', powerR if self._debug else 0
+
+			'''apply clipping through effective()'''
 			L.run(self.effective(powerL))
 			R.run(self.effective(powerR))
 			lasterror = error
