@@ -1,6 +1,7 @@
 from core import *
 import core
 import atexit
+from time import sleep
 atexit.register(stop)
 
 
