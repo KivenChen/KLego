@@ -90,7 +90,7 @@ pip install klego
               sudo easy_install -U pyobjc-core
               sudo easy_install -U pyobjc
               sudo pip install pybluez
-            ```
+          ```
 
         - （据报告，Mac 的蓝牙连接配置有出错的可能）
 
@@ -260,6 +260,7 @@ f(None) # 一直前进直到 stop 被调用
 ## 定位模块的使用
 
 方位检测的基础实现在 **pos_utils.py** 中，~~与 PyLego 的核心 **core.py** 为相互依赖关系~~ 在 v0.91 中，转为 core 对 pos_utils 的单向依赖。使用时只需要导入 **core.py** 即可食用 。详见下文的 `pos` 和 `boxes`
+
 ``` python
 from core import *
 ```
@@ -326,16 +327,103 @@ klego 集成了 dist 对象，可以作为函数访问获取距离，也可以�
 
 ### PID 模块的使用
 
-klego 集成了 pid 控制器对象，请参照以下方式调参并运行：
+klego 集成了 PID 控制器对象 `pid`，并且在版本 v0.98.2 中集成了增强 PID 模块，可以很方便的进行 PID 调参。
 
-```
-import klego
+#### 使用示范
 
+``` python
+from klego import *
+
+# 调节参数
 pid.kp = ...
 pid.ki = ...
 pid.kd = ...
-pid.offset = ...
+pid.calibrate_offset()
 
+# 运行
 pid.run()
+
+# PID 模块会自动加载 guard_window，可以随时停止程序
+
 ```
 
+
+
+#### 可调节的参数
+
+在模块的源文件 `PID.py`中，可以查看 `pid` 控制器的可调节变量
+
+``` PYTHON
+class PID_Controller:
+	def __init__(self, debug=False):
+		# developer option
+		self._debug = debug
+
+		###  tunable numeric value  ###
+		# get it a zero to disable a function
+
+		''' PID fundamental parameters '''
+		self.kp = 0.2  # learning rate
+		self.ki = 0.01  # integral
+		self.kd = 0.01  # derivative
+
+		'''environmental parameters.  '''
+		self.offset = -1  # tune with calibrate_offset(), the brightness for half black, half white
+		self.tp = 75  # base power value when the robot is cruising on a straight line
+		self.interval = 0.02  # a float `t`. Update the brightness info every t seconds
+
+		''' data postprocessing '''
+		self.reversive_boundary = 65  # any power smaller than this will be clipped and reversived 
+		self.clip_oscl = 40  # disallow any greater gap between L, R motor power
+		self.min_oscl = 20  # force oscillation
+
+```
+
+
+
+#### 增强模块
+
+除了 `calibrate_offset()` 方法以外，增强模块主要通过 `data postprocessing` 栏的变量进行调节
+
+##### calibrate_offset()
+
+进行 3 次原地旋转以实现光线取值，以校准 offset 参数。出于精确度考虑，PID 控制器必须要先校准之后才能运行。
+
+##### reversive_boundary
+
+该模块的实现代码如下。由于马力在 65 以下时没有作用，我们调用这个方法把 65 以下的马力反转。比如 将 60 转为 -70
+
+```python
+def effective(self, power_value):
+   # adjust the effective value by self.reversive_boundary
+   # because power lower than that will not work
+   reversive_boundary = self.reversive_boundary
+   delta = reversive_boundary - abs(power_value)
+   if reversive_boundary > power_value > 0:
+      return -reversive_boundary-delta
+   else:
+      return power_value
+```
+
+这样可以增加数据的连续性，避免造成巡线转角过大。
+
+##### clip_oscl & min_oscl
+
+通过强制加入震荡的幅度调节来进行选择。`clip_oscl` (clip oscillation) 限制最大振幅， `min_oscl` 限制最小振幅。该增强模块实现于 `run()`函数的 main loop 中。
+
+```python
+'''applying force oscillation'''
+if self.min_oscl > turn > 0:
+	turn = self.min_oscl
+elif -self.min_oscl < turn < 0:
+	turn = -self.min_oscl
+
+'''NOTE: clip_oscl is an experimental feature'''
+if abs(turn) > self.clip_oscl:
+	continue
+   
+l_power = tp - turn
+r_power = tp + turn
+```
+
+由于实际的巡线中，可能需要来回挪动以检测一些目标点。这个函数被加入 PID 模块。

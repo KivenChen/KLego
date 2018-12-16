@@ -27,18 +27,18 @@ class PID_Controller:
 		self.interval = 0.02  # a float t. Update the brightness info every t seconds
 
 		''' data postprocessing '''
-		self.clip = 65  # as boundary of
-		self.critical_gap = 40  # disallow any greater gap between L, R motor power
-		self.force_oscl = 20  # force oscillation
+		self.reversive_boundary = 65  # as boundary of
+		self.clip_oscl = 40  # disallow any greater gap between L, R motor power
+		self.min_oscl = 20  # force oscillation
 
 
 	def effective(self, value):
 		# clip the effective value by 60
 		# because power lower than that will not work
-		clip = self.clip
-		delta = clip - abs(value)
-		if clip > value > 0:
-			return -clip-delta
+		reversive_boundary = self.reversive_boundary
+		delta = reversive_boundary - abs(value)
+		if reversive_boundary > value > 0:
+			return -reversive_boundary-delta
 		else:
 			return value
 
@@ -55,6 +55,9 @@ class PID_Controller:
 		return 'kp: %d, ki: %d, kd: %d, offset: %d, tp: %d'\
 			% (self.kp, self.ki, self.kd, self.offset, self.tp)
 
+	def __call__(self, *args, **kwargs):
+		return str(self)
+
 	def calibrate_offset(self):
 		from core import spin
 		bottom1 = brightness()
@@ -70,6 +73,8 @@ class PID_Controller:
 		return self.offset
 
 	def run(self):
+		if self.offset == -1:
+			raise ValueError("Please invoke calibrate_offset() first")
 		# tunable parameters
 		kp = self.kp
 		ki = self.ki
@@ -98,15 +103,14 @@ class PID_Controller:
 			turn = kp * error + ki * integral + kd * deriv
 
 			'''applying force oscillation'''
-			if self.force_oscl > turn > 0:
-				turn = self.force_oscl
-			elif -self.force_oscl < turn < 0:
-				turn = -self.force_oscl
+			if self.min_oscl > turn > 0:
+				turn = self.min_oscl
+			elif -self.min_oscl < turn < 0:
+				turn = -self.min_oscl
 
-			'''NOTE: critical_gap is an experimental feature'''
-			if abs(turn) > self.critical_gap:
+			'''NOTE: clip_oscl is an experimental feature'''
+			if abs(turn) > self.clip_oscl:
 				continue
-				turn = self.critical_gap if turn > 0 else - self.critical_gap
 
 			powerL = tp - turn
 			powerR = tp + turn
