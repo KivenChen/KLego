@@ -23,7 +23,7 @@ setup(
     url='https://kivenchen,us',
 
     packages=['klego'],
-    install_requires=['pyusb', 'nxt-python'],
+    install_requires=['pyusb', 'nxt-python', 'numpy', 'scipy'],
     dependency_links=[
         'https://kivenchen.us/kiven-s-pybluez/PyBluez-0.22.1.tar.gz'],
     zip_safe=False,

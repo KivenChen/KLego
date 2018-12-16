@@ -1,20 +1,9 @@
 # Copyright - Kiven, 2018
 
-from pos_utils import *
-import nxt.locator as locator
-from nxt.motor import *
-import atexit
-from nxt.sensor import *
-from time import sleep
-from threading import Thread
-from color_utils import *
-from dist_utils import *
-from PID import *
-from guard import *
 # dev ops
 _debug = True
 _guard = False
-
+_debug_pid = True
 # tunable parameters
 GREEN_BLACK_BOUNDARY = 100  # deprecated
 GREEN_WHITE_BOUNDARY = 250  # deprecated
@@ -65,9 +54,9 @@ sonic = None
 touch = None
 color = None
 dist = None
-pos = Position()  # which marks the position of the robot
-boxes = Boxes()  # which stores all the boxes here
-pid = PID_Controller()
+pos = None  # which marks the position of the robot
+boxes = None  # which stores all the boxes here
+pid = None
 
 ''' this file is to be run separately
 '''
@@ -193,6 +182,22 @@ def stopped(motor=None):
     return motor._get_new_state().power == 0
 
 
+def going_forward(motor=None):
+    if motor is None:
+        motor = M
+    return motor._get_new_state().power > 0
+
+
+def turning():
+    return L._get_new_state().power * R._get_new_state().power < 0
+
+
+def going_back(motor=None):
+    if motor is None:
+        motor = M
+    return motor._get_new_state().power < 0
+
+
 def power(single_motor):
     return single_motor._get_new_state().power
 
@@ -295,12 +300,23 @@ def calibrate_light_by_black():  # deprecated
 def sound():
     Thread(target=brick.play_tone_and_wait, args=(1000, 500)).start()
 
+from pos_utils import *
+import nxt.locator as locator
+from nxt.motor import *
+import atexit
+from nxt.sensor import *
+from time import sleep
+from threading import Thread
+from color_utils import *
+from dist_utils import *
+from PID import *
+
 
 def reset(remote=False):
     global brick, L, R, M, radar_base, \
             light, sonic, touch, \
             LIGHT_BASE, _lock,\
-            color, dist
+            color, dist, pos, boxes, pid
 
     print "CORE: Connecting via", 'Bluetooth. May take up to 20 seconds' if remote else 'USB'
     connect_method = locator.Method(not remote, remote)
@@ -324,10 +340,14 @@ def reset(remote=False):
     light = Light(brick, PORT_3)
     sonic = Ultrasonic(brick, PORT_2)
     touch = Touch(brick, PORT_4)
+    sleep(1)
     color = Color(light)
     global dist
-    dist = Distance(sonic)
-
+    if not _debug_pid:
+        pos = Position()  # which marks the position of the robot
+        boxes = Boxes()  # which stores all the boxes here
+        dist = Distance(sonic)
+    pid = PID_Controller()
     if _guard:
         guard_window()
     # calibrate light sensor
@@ -346,3 +366,4 @@ except locator.BrickNotFoundError:
     reset(True)
 
 atexit.register(stop)
+from guard import *

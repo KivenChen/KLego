@@ -1,8 +1,17 @@
-from core import *
+print 'guard utility: initializing'
 from time import sleep
 from threading import Thread
+from random import randint
+dist_label = None
 
-def _guard():
+def update_dist_data(dist_label):
+    while True:
+        sleep(0.005)
+        text = str(randint(1,10)) + 'test'
+        dist_label['text'] = text
+
+def _guard(stop_func):
+    global dist_label
     # to reduce dependency on tkinter
     # the module is not imported from the beginning
     try:
@@ -17,32 +26,33 @@ def _guard():
     window.geometry("250x136")
 
     def terminator():
-        global _stop
-        _stop = True
-        stop()
+        stop_func()
         sleep(2)
         import sys
         sys.exit()
 
+
+
+
     def stopper():
         def work():
-            global _stop
-            _stop = True
-            stop()
+            stop_func()
             sleep(5)
-            _stop = False
-
         Thread(target=work).start()
 
     button1 = tk.Button(window, text='Stop Robot', command=stopper)
     button2 = tk.Button(window, text='Terminate Program', command=terminator)
+    dist_label = tk.Label(window, text="ready")
+
     button1.pack()
     button2.pack()
+    dist_label.pack()
+
     window.mainloop()
 
 
-def guard_window():
-    Thread(target=_guard).start()
+def guard_window(stop_func):
+    Thread(target=_guard, args=(stop_func,)).start()
 
 
 def _test():

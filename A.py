@@ -1,7 +1,8 @@
-import klego
-from klego.core import *
 import random
 import atexit
+from klego import core
+from klego.core import *
+from klego.core import _stop
 
 from tkinter import Tk
 import tkinter as tk
@@ -28,22 +29,23 @@ def run():
     color.activate = True
     while True and not _stop:
         if black():  # hit black boundary
-            # color.activate = False
             print('black')
             stop()
             b(1, p=120)
-            color.activate = True
             color.color = 'white'
             color.reset()  # todo: if this is a green one?
+            dist.reset()
             direction = random.uniform(core.to_rolls['90'], core.to_rolls['90'] * 1.5) // 0.01 / 100
             spin(direction)
             M.run(CRUISING_SPEED)
 
-        if dist.danger or green():  # obstacle inboundd
+        if dist.danger:  # obstacle inboundd
             stop()
             print('obstacle inbound')
+            '''
             M.run(APPROACHING_SPEED)  # slow down
             sleep(0.2)
+            '''
             if green():  # bonus
                 print("bonus !!!")
                 stop()
@@ -54,6 +56,7 @@ def run():
                 direction = random.uniform(core.to_rolls['45'], core.to_rolls['90'] * 2) // 0.01 / 100
                 spin(direction)
                 color.reset()
+                dist.reset()
                 M.run(CRUISING_SPEED)
             else:
                 print('danger: non bonus obstacle')
@@ -65,13 +68,12 @@ def run():
                 spin(direction)
                 print('spinned')
                 M.run(CRUISING_SPEED)
-            color.activate = True
 
 
 def test_parta():
     try:
         print('guard: in progress')
-        get_guard().start()
+        guard_window()
         run()
     except Exception as e:
         print(e.message)

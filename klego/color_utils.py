@@ -7,12 +7,11 @@ instead of using fixed thresholds
 from threading import Thread
 from time import sleep
 
-def _handle_green_separately(self):
-    if self.color == 'green':
-        pass
+
+_debug_color_change = False
 
 
-def _monitor(self):
+def _monitor_color(inst):
     print("COLOR: initializing, 1 second to wait")
     sleep(1)
     print("COLOR: ready")
@@ -25,57 +24,59 @@ def _monitor(self):
         _power = max((abs(l_power), abs(r_power)))
         _r = 1  # sensitivity
 
-        if self.color == 'green':
+        if inst.color == 'green':
             pass
-        if not self.activate:
+        if not inst.activate:
             continue
         if l_power * r_power <= 0:  # stopped or spinning
             # continue
-            _r = 2
+            _r = 1.5
             pass
         if l_power < 0 and r_power < 0:  # backward
             # continue
             pass
         if _power < 50:  # not even moving
             continue
-        sleep(0.05)
 
-        self.history.pop()
-        self.history.insert(0, self.now)
-        self.prev = sum(self.history[4:]) / (len(self.history)-4)
-        self.reset()
-        self.now = sum(self.history[4:]) / (len(self.history)-4)
+        inst.history.pop()
+        inst.history.insert(0, inst.now)
+        inst.prev = sum(inst.history[4:]) / (len(inst.history) - 4)
+        inst.reset()
+        inst.now = sum(inst.history[4:]) / (len(inst.history) - 4)
 
-        if self._debug_color and abs(self.prev - self.now) > 12:
-            print "COLOR value change: ", self.prev, ' to ', self.now, ', now', self.color.upper()
+        if inst._debug_refresh:
+            print (inst.prev, inst.now)
+
+        if inst._debug_color and abs(inst.prev - inst.now) > 12:
+            print "COLOR value change: ", inst.prev, ' to ', inst.now, ', now', inst.color.upper()
 
         # GETTING BRIGHTER
-        if self.now - self.prev > _r*self.G_TO_W and self.color == 'green':
-                self.color = 'white'
-                self.reset()
-                print "COLOR: change from GREEN 2 WHITE"
-        elif _r*self.B_TO_G < self.now- self.prev < _r*self.B_TO_W and self.color == 'black':
-                self.color = 'green'
-                self.reset()
-                print "COLOR: change from BLACK 2 GREEN"
-        elif _r*self.B_TO_W < self.now - self.prev and self.color == 'black':
-            self.color = 'white'
-            self.reset()
-            print "COLOR: change from BLACK 2 WHITE"
+        if inst.now - inst.prev > _r*inst.G_TO_W and inst.color == 'green':
+                inst.color = 'white'
+                inst.reset()
+                print "COLOR: change from GREEN 2 WHITE" if _debug_color_change else 0
+        elif _r*inst.B_TO_G < inst.now - inst.prev < _r*inst.B_TO_W and inst.color == 'black':
+                inst.color = 'green'
+                inst.reset()
+                print "COLOR: change from BLACK 2 GREEN" if _debug_color_change else 0
+        elif _r*inst.B_TO_W < inst.now - inst.prev and inst.color == 'black':
+            inst.color = 'white'
+            inst.reset()
+            print "COLOR: change from BLACK 2 WHITE" if _debug_color_change else 0
 
         # GETTING DARKER
-        if _r*self.B_TO_W > self.prev - self.now > self.G_TO_W*_r and self.color == 'white':
-            self.color = 'green'
-            self.reset()
+        if _r*inst.B_TO_W > inst.prev - inst.now > inst.G_TO_W*_r and inst.color == 'white':
+            inst.color = 'green'
+            inst.reset()
             print("COLOR: change from WHITE 2 GREEN")
-        elif _r*self.B_TO_G < self.prev - self.now < _r*self.G_TO_W and self.color == 'green':
-            self.color = 'black'
-            self.reset()
+        elif _r*inst.B_TO_G < inst.prev - inst.now < _r*inst.G_TO_W and inst.color == 'green':
+            inst.color = 'black'
+            inst.reset()
             print("COLOR: change from GREEN 2 BLACK")
-        elif _r*self.B_TO_W < self.prev - self.now:
-            if self.color == 'white':
-                self.color = 'black'
-                self.reset()
+        elif _r*inst.B_TO_W < inst.prev - inst.now:
+            if inst.color == 'white':
+                inst.color = 'black'
+                inst.reset()
                 print("COLOR: change from WHITE 2 BLACK")
 
 
@@ -89,12 +90,13 @@ class Color:
 
         self._debug_global = False
         self._debug_color = True
+        self._debug_refresh = True
 
-        self.B_TO_G = 70
-        self.G_TO_W = 90
+        self.B_TO_G = 70 // 2
+        self.G_TO_W = 90 // 2
         self.B_TO_W = self.B_TO_G + self.G_TO_W
 
-        work = Thread(target=_monitor, name='color')
+        work = Thread(target=_monitor_color, args=(self,), name='color')
         work.start()
 
     def reset(self):
