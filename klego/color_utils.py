@@ -15,6 +15,7 @@ def _handle_green_separately(self):
 def _monitor(self):
     print("COLOR: initializing, 1 second to wait")
     sleep(1)
+    print("COLOR: ready")
     # well ... I'm pretty sure only ONE second is needed actually
     # because if core module is yet to be loaded, the importation will run into error
     from core import L, R
@@ -38,8 +39,6 @@ def _monitor(self):
         if _power < 50:  # not even moving
             continue
         sleep(0.05)
-
-        _handle_green_separately(self)
 
         self.history.pop()
         self.history.insert(0, self.now)
@@ -95,13 +94,13 @@ class Color:
         self.G_TO_W = 90
         self.B_TO_W = self.B_TO_G + self.G_TO_W
 
-        work = Thread(target=_monitor, args=(self,))
+        work = Thread(target=_monitor, name='color')
         work.start()
 
     def reset(self):
         def _work(self):
             self.history = [(self.sensor.get_lightness(),
-                             sleep(0.01)
+                             sleep(0.005)
                              )[0] for i in range(10)]
         _work(self)
         # Thread(target=_work, args=(self,)).start()

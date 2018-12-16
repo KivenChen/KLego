@@ -1,5 +1,5 @@
-from core import *
-import core
+import klego
+from klego.core import *
 import random
 import atexit
 
@@ -39,7 +39,7 @@ def run():
             spin(direction)
             M.run(CRUISING_SPEED)
 
-        if distance() <= 30 or touch.is_pressed() or green():  # obstacle inboundd
+        if dist.danger or green():  # obstacle inboundd
             stop()
             print('obstacle inbound')
             M.run(APPROACHING_SPEED)  # slow down

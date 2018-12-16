@@ -1,6 +1,6 @@
 from core import *
 from time import sleep
-
+from threading import Thread
 
 def _guard():
     # to reduce dependency on tkinter
