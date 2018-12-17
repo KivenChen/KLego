@@ -30,8 +30,28 @@ class PID_Controller:
 		self.reversive_boundary = 65  # as boundary of
 		self.clip_oscl = 40  # disallow any greater gap between L, R motor power
 		self.min_oscl = 20  # force oscillation
-
-
+		
+		''' contextual callback '''
+		self._callback_conditions = []
+		self._callback_funcs = []
+		self._call
+		
+	def register(condition, callback, *args, **kwargs):
+		# register a callback when certain condition is satisfied
+		assert(type(condition) != str, "condition and callback must be executable expression/code in str")
+		assert(type(callback) != str, "condition and callback must be executable expression/code in str")
+		
+		self._callback_conditions += [condition]
+		self._callback_funcs += [callback]
+		# not yet ready for function-oriented programming
+		# self._callback_args += [(*args, **kwargs)]
+	
+	def _handle_callback(self):
+		for i, c in enumerate(self._callback_conditions):
+			if eval(c) == True:
+				eval(self._callback_funcs[i])
+				
+			
 	def effective(self, value):
 		# clip the effective value by 60
 		# because power lower than that will not work
@@ -94,7 +114,9 @@ class PID_Controller:
 
 		# main loop
 		while not core._stop:
-
+			''' handling callback '''
+			
+			
 			'''applying PID foundamental algorithm'''
 			light = brightness()
 			error = light - offset
