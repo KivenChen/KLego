@@ -6,7 +6,11 @@ from guard import *
 import numpy as np
 import atexit
 atexit.register(stop)
+from random import uniform
 
+
+def alarm():
+	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
 class PID_Controller:
 	def __init__(self, debug=False):
@@ -17,29 +21,30 @@ class PID_Controller:
 		# get it a zero to disable a function
 
 		''' PID fundamental parameters '''
-		self.kp = 0.2  # learning rate
+		self.kp = 0.4  # learning rate
 		self.ki = 0.01  # integral
 		self.kd = 0.01  # derivative
 
 		'''environmental parameters.  '''
-		self.offset = -1  # tune with calibrate_offset(), the brightness for half black, half white
-		self.tp = 75  # power value when the robot is cruising on a straight line
+		self.offset = 265  # tune with calibrate_offset(), the brightness for half black, half white
+		self.tp = 72  # power value when the robot is cruising on a straight line
 		self.interval = 0.02  # a float t. Update the brightness info every t seconds
 
 		''' data postprocessing '''
 		self.reversive_boundary = 65  # as boundary of
 		self.clip_oscl = 40  # disallow any greater gap between L, R motor power
 		self.min_oscl = 20  # force oscillation
-		
+		self.critical = 50
+
+
 		''' contextual callback '''
-		self._callback_conditions = []
-		self._callback_funcs = []
-		self._call
+		self._callback_conditions = ['245 < brightness() < 252']
+		self._callback_funcs = ['alarm()']
 		
-	def register(condition, callback, *args, **kwargs):
+	def register(self, condition, callback):
 		# register a callback when certain condition is satisfied
-		assert(type(condition) != str, "condition and callback must be executable expression/code in str")
-		assert(type(callback) != str, "condition and callback must be executable expression/code in str")
+		# assert(type(condition) != str, "condition and callback must be executable expression/code in str")
+		# assert(type(callback) != str, "condition and callback must be executable expression/code in str")
 		
 		self._callback_conditions += [condition]
 		self._callback_funcs += [callback]
@@ -48,7 +53,7 @@ class PID_Controller:
 	
 	def _handle_callback(self):
 		for i, c in enumerate(self._callback_conditions):
-			if eval(c) == True:
+			if eval(c):
 				eval(self._callback_funcs[i])
 				
 			
@@ -81,9 +86,9 @@ class PID_Controller:
 	def calibrate_offset(self):
 		from core import spin
 		bottom1 = brightness()
-		_, light1 = spin(0.1), brightness()
-		_, light2 = spin(-0.2), brightness()
-		spin(0.1)
+		_, light1 = spin(0.3), brightness()
+		_, light2 = spin(-0.6), brightness()
+		spin(0.3)
 		bottom2 = brightness()
 		avg_light = (light1 + light2) // 2
 		print(avg_light)
@@ -115,7 +120,7 @@ class PID_Controller:
 		# main loop
 		while not core._stop:
 			''' handling callback '''
-			
+			self._handle_callback()
 			
 			'''applying PID foundamental algorithm'''
 			light = brightness()
@@ -130,12 +135,17 @@ class PID_Controller:
 			elif -self.min_oscl < turn < 0:
 				turn = -self.min_oscl
 
+			_r = 1
+			if uniform(0, 1) < 0.02:
+				_r = - _r
 			'''NOTE: clip_oscl is an experimental feature'''
 			if abs(turn) > self.clip_oscl:
 				continue
+				# turn = self.clip_oscl
 
-			powerL = tp - turn
-			powerR = tp + turn
+			powerL = tp + turn * _r
+			powerR = tp - turn * _r
+
 			print powerL, ' ', powerR if self._debug else 0
 
 			'''apply clipping through effective()'''

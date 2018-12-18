@@ -324,22 +324,22 @@ def reset(remote=False):
     print("Connection to brick established\n")
 
     print("CORE: Initializing components")
-    L = Motor(brick, PORT_B)
+    L = Motor(brick, PORT_A)
     R = Motor(brick, PORT_C)
     M = SynchronizedMotors(L, R, TURN_RATIO)
 
     try:
-        radar_base = Motor(brick, PORT_A)
+        radar_base = Motor(brick, PORT_B)
         print("CORE: Found radar turning base")
-        _handle_radar_base(radar_base)
+        # _handle_radar_base(radar_base)
     except:
         print("CORE: Found no radar turning base connecting PORT A")
         print("Normal Mode activated")
 
     _lock = False
-    light = Light(brick, PORT_3)
+    light = Light(brick, PORT_1)
     sonic = Ultrasonic(brick, PORT_2)
-    touch = Touch(brick, PORT_4)
+    # touch = Touch(brick, PORT_4)
     sleep(1)
     color = Color(light)
     global dist
