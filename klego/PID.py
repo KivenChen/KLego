@@ -15,22 +15,31 @@ def alarm():
 class PID_Controller:
 	def __init__(self, debug=False):
 		# dev ops
-		self._debug = True
+		self._debug = False
 
 		# tunable numeric value
 		# get it a zero to disable a function
 
 		''' PID fundamental parameters '''
-		self.kp = 0.2  # learning rate
-		self.ki = 0.02  # integral weight
-		self.kd = 0.05  # derivative
+		"""NOTE: kp tuning
+		Moreover, 0.3, 0.4 are also helpful under some circumstances
+		Night time: 0.15 ( where brightness around 250 - 350), ki and kp should also be kept smaller
+		Night time (under a light) kp 0.17, ki and kp should not change
+		Day time: 0.2 (where brightness around 550 to 650), ki 0.02 - 0.04, kd 0.05
+		Except Cross Night config: 0.15 0.01 0.03
+		
+		"""
+		self.kp = -1  # learning rate
+		self.ki = 0.01  # integral weight
+		self.kd = 0.02  # derivative
 
 		'''environmental parameters.  '''
-		self.offset = 265  # tune with calibrate_offset(), the brightness for half black, half white
-		self.tp = 80  # power value when the robot is cruising on a straight line
+		"""NOTE: the offset should be tuned"""
+		self.offset = -1  # tune with calibrate_offset(), the brightness for half black, half white
+		self.tp = 76  # power value when the robot is cruising on a straight line
 		self.interval = 0.01  # a float t. Update the brightness info every t seconds
 		self.all_white_threshold = -1
-		self.corss_threshold = -1
+		self.cross_threshold = 220
 
 		''' data postprocessing '''
 		self.history_len = 20
@@ -38,6 +47,7 @@ class PID_Controller:
 		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
 		self.min_oscl = 0  # force oscillation
 		self.alignment = 0.00
+		self.critical_light_reverse = 190
 
 
 		''' contextual callback '''
@@ -45,32 +55,48 @@ class PID_Controller:
 		self._callback_funcs = []
 	
 	def all_white(self):
+		"""
+		judge if the robot is encountering all-white situation
+		:return: bool
+		"""
 		return self.all_white_threshold < brightness()
 		
 	def encountered_cross(self):
-		return self.cross_threshold < brightness()
-		
-				
-	def when(self, condition, callback):
-		# register a callback when certain condition is satisfied
+		"""
+		judge if the robot has encountered a cross
+		:return: bool
+		"""
+		return self.cross_threshold > brightness()
+
+	def when(self, condition, *args):
+		"""
+		:param condition: string oode to run
+		:param callback: string code to run
+		:return:
+		"""
 		# assert(type(condition) != str, "condition and callback must be executable expression/code in str")
 		# assert(type(callback) != str, "condition and callback must be executable expression/code in str")
 		
 		self._callback_conditions += [condition]
-		self._callback_funcs += [callback]
+		self._callback_funcs += list(args)
 		# not yet ready for function-oriented programming
 		# self._callback_args += [(*args, **kwargs)]
 	
 	def _handle_callback(self):
+		"""
+		this function handles registered callbacks
+		:return:
+		"""
 		for i, c in enumerate(self._callback_conditions):
 			if eval(c):
-				eval(self._callback_funcs[i])
-				
-			
+				for f in self._callback_funcs[i]:
+					eval(f)
+
 	def effective(self, value):
-		# clip the effective value by 60
-		# because power lower than that will not work
-		'''_complement is an experimental feature'''
+		'''
+		:param value: power value
+		:return:
+		'''
 		_complement = 1.1
 		
 		''' prepare for power reverse '''
@@ -94,9 +120,16 @@ class PID_Controller:
 			else:
 				return value
 
-
 	def save_model(self, fpath):
 		np.save(fpath, np.asarray([self]))
+
+	def _verified_light(self, light):
+		bound = self.critical_light_reverse
+		if light < bound:
+			delta = bound - light
+			alarm()
+			return bound + delta
+		return light
 
 	@staticmethod
 	def load(fpath):
@@ -126,18 +159,21 @@ class PID_Controller:
 
 	def run(self):
 		if self.offset == -1:
-			raise ValueError("Please invoke calibrate_offset() first")
+			raise ValueError("Please invoke pid.calibrate_offset() first")
+		if self.kp == -1:
+			raise ValueError("kp and only kp is not preset. Please assign value manually")
 		# tunable parameters
 		kp = self.kp
 		ki = self.ki
 		kd = self.kd
+
 		interval = self.interval
 		offset = self.offset  # todo: mean of brightness
 		tp = self.tp
 
 		# non-tunnable parameters
 
-		integral_history = 0
+		integral_history = []
 		lasterror = 0
 		L = core.L
 		R = core.R
@@ -147,14 +183,18 @@ class PID_Controller:
 
 		# main loop
 		while not core._stop:
+			''' update environment '''
+			light = self._verified_light(brightness())
+			error = light - offset
+
 			''' handling callback '''
 			self._handle_callback()
+
 			
 			'''applying PID foundamental algorithm'''
-			light = brightness()
-			error = light - offset
 			
-			integral_history += [error]
+			integral_history.insert(0, error)
+			integral = sum(integral_history)
 			integral_history.pop() if len(integral_history) > self.history_len else 0
 			
 			deriv = error - lasterror
@@ -169,6 +209,7 @@ class PID_Controller:
 			'''applying alignment'''
 			if uniform(0, 1) < self.alignment:
 				_r = - _r
+				continue
 			
 			'''NOTE: clip oscillation is an experimental feature'''
 			if abs(turn) > self.clip_oscl:
@@ -185,3 +226,4 @@ class PID_Controller:
 			R.run(self.effective(powerR))
 			lasterror = error
 			sleep(interval)
+		return False

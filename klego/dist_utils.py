@@ -13,11 +13,13 @@ _debug = False  # if broadcast debug info
 
 
 def _fix_error(dist):
-    # try to fix the turbulance
+    # try to fix the turbulence
     pass
 
-def uncertain_history(hist):
-	return hist.count(255) > 7
+
+def certain_history(hist):
+    return hist.count(255) < 7
+
 
 def update_dist(dist):
     # check if the reading change too rapidly
@@ -28,8 +30,8 @@ def update_dist(dist):
     # algorithm: get the modes
     now = np.argmax(np.bincount(now))
     prev = np.argmax(np.bincount(prev))
-    stable = abs(now - prev) < dist.EXCEPTION_THRESHOLD:
-	'''
+    stable = abs(now - prev) < dist.EXCEPTION_THRESHOLD
+    '''
     if stable and now > dist.NORMDIST_THRESHOLD:
         debug('safe', dist.now, dist.history)
     elif stable and now < dist.NORMDIST_THRESHOLD:
@@ -38,13 +40,13 @@ def update_dist(dist):
     elif not stable and now < dist.EXCPDIST_THRESHOLD:
         dist.danger = True
         debug("not stable", dist.now, dist.history)
-	'''
-	
-	_r = calc.time_linearity(history) if certain_history() else 1
-	danger_dist = calc.updated_danger_dist(dist.NORMDIST_THRESHOLD, _r, 'logistic')
-	
-	if now < danger_dist:
-		dist.danger = True	
+    '''
+    _r = calc.time_linearity(history) if certain_history(history) else 1
+    danger_dist = calc.updated_danger_dist(dist.NORMDIST_THRESHOLD, _r, 'logistic')
+
+    if now < danger_dist:
+        dist.danger = True
+
 
 def _monitor_dist(inst):
     sonic = inst.sensor
@@ -72,7 +74,6 @@ def _monitor_dist(inst):
         update_dist(inst)
 
 
-
 def debug(*args):
     if _debug:
         print "DIST: ", args
@@ -84,7 +85,6 @@ class Distance:
     def activate(self):
         work = Thread(target=_monitor_dist, args=(self,), name='distance')
         work.start()
-
 
     def reset(self):
         self._lock = True
@@ -116,25 +116,22 @@ class Distance:
         
 
 class calc:
-	@staticmethod
-	def time_linearity(X):
-		Y = [i for i in range(len(X))]
-		raw = np.corrcoef(X, Y)
-		result = abs(raw[0][1])
-		return result if not np.isnan(result) else 0
+    @staticmethod
+    def time_linearity(X):
+        Y = [i for i in range(len(X))]
+        raw = np.corrcoef(X, Y)
+        result = abs(raw[0][1])
+        return result if not np.isnan(result) else 0
 
-	@staticmethod
-	def sigmoid(x, logistic_coef):
-		return 1 / (1 + np.exp((-x + 0.5)*logistic_coef))
-	
-	@staticmethod	
-	def updated_danger_dist(orig, linearity, algo='linear', logistic_coef=15):
-		if algo == 'lineartiy':
-			return orig / linearity
-		elif algo == 'sqrt':
-			return orig / math.sqrt(linearity)
-		elif algo == 'logistic':
-			return calc.sigmoid(linearity, logistic_coef)
-	
-	
-					
+    @staticmethod
+    def sigmoid(x, logistic_coef):
+        return 1 / (1 + np.exp((-x + 0.5)*logistic_coef))
+
+    @staticmethod
+    def updated_danger_dist(orig, linearity, algo='linear', logistic_coef=15):
+        if algo == 'linear':
+            return orig / linearity
+        elif algo == 'sqrt':
+            return orig / math.sqrt(linearity)
+        elif algo == 'logistic':
+            return calc.sigmoid(linearity, logistic_coef)
