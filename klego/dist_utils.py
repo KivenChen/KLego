@@ -3,7 +3,8 @@
 from time import sleep
 from threading import Thread
 import numpy as np
-import scipy.stats as stats
+import math
+
 # sleep(1)
 from core import going_back, going_forward, turning
 
@@ -15,6 +16,8 @@ def _fix_error(dist):
     # try to fix the turbulance
     pass
 
+def uncertain_history(hist):
+	return hist.count(255) > 7
 
 def update_dist(dist):
     # check if the reading change too rapidly
@@ -25,10 +28,8 @@ def update_dist(dist):
     # algorithm: get the modes
     now = np.argmax(np.bincount(now))
     prev = np.argmax(np.bincount(prev))
-    stable = True
-    if abs(now - prev) > dist.EXCEPTION_THRESHOLD:
-        stable = False
-
+    stable = abs(now - prev) < dist.EXCEPTION_THRESHOLD:
+	'''
     if stable and now > dist.NORMDIST_THRESHOLD:
         debug('safe', dist.now, dist.history)
     elif stable and now < dist.NORMDIST_THRESHOLD:
@@ -37,12 +38,18 @@ def update_dist(dist):
     elif not stable and now < dist.EXCPDIST_THRESHOLD:
         dist.danger = True
         debug("not stable", dist.now, dist.history)
-
+	'''
+	
+	_r = calc.time_linearity(history) if certain_history() else 1
+	danger_dist = calc.updated_danger_dist(dist.NORMDIST_THRESHOLD, _r, 'logistic')
+	
+	if now < danger_dist:
+		dist.danger = True	
 
 def _monitor_dist(inst):
     sonic = inst.sensor
     print('DIST: initializing, may take 1 more second')
-    sleep(2)
+    sleep(1) 
     _prev_deta = 0
     print('DIST: ready')
     while True:
@@ -90,6 +97,7 @@ class Distance:
 
     def __init__(self, sensor, obstacle_inbound=False):
         self.HISTORY_LEN = 10  # keep a history list of this length
+        # self.HISTORY_ARCHIVE = 10 # length of the list where 1 in every 10 histories will be archived
         self.IGNORE_MOST_RECENT = 4  # a integer n. when compare the now to the prev, ignore the n most recent records
         self.INTERVAL = 0.1  # a float t which MUST BE > 0.01. Refresh distance every t seconds
         self.EXCEPTION_THRESHOLD = 90
@@ -113,10 +121,20 @@ class calc:
 		Y = [i for i in range(len(X))]
 		raw = np.corrcoef(X, Y)
 		result = abs(raw[0][1])
-		return result
+		return result if not np.isnan(result) else 0
 
+	@staticmethod
+	def sigmoid(x, logistic_coef):
+		return 1 / (1 + np.exp((-x + 0.5)*logistic_coef))
+	
 	@staticmethod	
-	def improved_danger_dist(dist):
-		
-		
-		
+	def updated_danger_dist(orig, linearity, algo='linear', logistic_coef=15):
+		if algo == 'lineartiy':
+			return orig / linearity
+		elif algo == 'sqrt':
+			return orig / math.sqrt(linearity)
+		elif algo == 'logistic':
+			return calc.sigmoid(linearity, logistic_coef)
+	
+	
+					
