@@ -15,26 +15,26 @@ def alarm():
 class PID_Controller:
 	def __init__(self, debug=False):
 		# dev ops
-		self._debug = False
+		self._debug = True
 
 		# tunable numeric value
 		# get it a zero to disable a function
 
 		''' PID fundamental parameters '''
-		self.kp = 0.4  # learning rate
-		self.ki = 0.01  # integral
-		self.kd = 0.01  # derivative
+		self.kp = 0.2  # learning rate
+		self.ki = 0.02  # integral
+		self.kd = 0.05  # derivative
 
 		'''environmental parameters.  '''
 		self.offset = 265  # tune with calibrate_offset(), the brightness for half black, half white
-		self.tp = 72  # power value when the robot is cruising on a straight line
-		self.interval = 0.02  # a float t. Update the brightness info every t seconds
+		self.tp = 80  # power value when the robot is cruising on a straight line
+		self.interval = 0.01  # a float t. Update the brightness info every t seconds
 
 		''' data postprocessing '''
-		self.reversive_boundary = 65  # as boundary of
-		self.clip_oscl = 40  # disallow any greater gap between L, R motor power
-		self.min_oscl = 20  # force oscillation
-		self.critical = 50
+		self.reversive_boundary = 70  # as boundary of
+		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
+		self.min_oscl = 0  # force oscillation
+		self.alignment = 0.00
 
 
 		''' contextual callback '''
@@ -60,12 +60,24 @@ class PID_Controller:
 	def effective(self, value):
 		# clip the effective value by 60
 		# because power lower than that will not work
+		_complement = 1.1
 		reversive_boundary = self.reversive_boundary
-		delta = reversive_boundary - abs(value)
-		if reversive_boundary > value > 0:
-			return -reversive_boundary-delta
+		delta = reversive_boundary - value
+		if reversive_boundary > value:
+			output = (-reversive_boundary-delta) * _complement
+			if output > 127:
+				return 127
+			elif output < -127:
+				return -127
+			else:
+				return output
 		else:
-			return value
+			if value > 127:
+				return 127
+			elif value < -127:
+				return 127
+			else:
+				return value
 
 
 	def save_model(self, fpath):
@@ -86,9 +98,9 @@ class PID_Controller:
 	def calibrate_offset(self):
 		from core import spin
 		bottom1 = brightness()
-		_, light1 = spin(0.3), brightness()
-		_, light2 = spin(-0.6), brightness()
-		spin(0.3)
+		_, light1 = spin(0.2), brightness()
+		_, light2 = spin(-0.4), brightness()
+		spin(0.2)
 		bottom2 = brightness()
 		avg_light = (light1 + light2) // 2
 		print(avg_light)
@@ -129,24 +141,26 @@ class PID_Controller:
 			deriv = error - lasterror
 			turn = kp * error + ki * integral + kd * deriv
 
-			'''applying force oscillation'''
 			if self.min_oscl > turn > 0:
 				turn = self.min_oscl
 			elif -self.min_oscl < turn < 0:
 				turn = -self.min_oscl
 
+			'''applying force oscillation'''
+
 			_r = 1
-			if uniform(0, 1) < 0.02:
+			_rl = 1.2
+			_rr = 1
+			if uniform(0, 1) < self.alignment:
 				_r = - _r
 			'''NOTE: clip_oscl is an experimental feature'''
 			if abs(turn) > self.clip_oscl:
 				continue
 				# turn = self.clip_oscl
-
-			powerL = tp + turn * _r
-			powerR = tp - turn * _r
-
-			print powerL, ' ', powerR if self._debug else 0
+			powerL = tp + turn  * _r
+			powerR = tp - turn  * _r
+			# print(type(self.effective(powerR)))
+			print (powerL, ' ', powerR) if self._debug else ''
 
 			'''apply clipping through effective()'''
 			L.run(self.effective(powerL))

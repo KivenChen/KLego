@@ -90,7 +90,7 @@ class Color:
 
         self._debug_global = False
         self._debug_color = True
-        self._debug_refresh = True
+        self._debug_refresh = False
 
         self.B_TO_G = 70 // 2
         self.G_TO_W = 90 // 2
