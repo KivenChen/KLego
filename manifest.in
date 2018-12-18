@@ -12,3 +12,4 @@ prune .idea
 prune __pycache__
 
 exclude A.py
+exclude B.py

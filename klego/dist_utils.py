@@ -3,7 +3,8 @@
 from time import sleep
 from threading import Thread
 import numpy as np
-sleep(1)
+import scipy.stats as stats
+# sleep(1)
 from core import going_back, going_forward, turning
 
 
@@ -104,3 +105,18 @@ class Distance:
 
     def __call__(self):
         return self.now
+        
+
+class calc:
+	@staticmethod
+	def time_linearity(X):
+		Y = [i for i in range(len(X))]
+		raw = np.corrcoef(X, Y)
+		result = abs(raw[0][1])
+		return result
+
+	@staticmethod	
+	def improved_danger_dist(dist):
+		
+		
+		

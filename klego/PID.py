@@ -22,15 +22,18 @@ class PID_Controller:
 
 		''' PID fundamental parameters '''
 		self.kp = 0.2  # learning rate
-		self.ki = 0.02  # integral
+		self.ki = 0.02  # integral weight
 		self.kd = 0.05  # derivative
 
 		'''environmental parameters.  '''
 		self.offset = 265  # tune with calibrate_offset(), the brightness for half black, half white
 		self.tp = 80  # power value when the robot is cruising on a straight line
 		self.interval = 0.01  # a float t. Update the brightness info every t seconds
+		self.all_white_threshold = -1
+		self.corss_threshold = -1
 
 		''' data postprocessing '''
+		self.history_len = 20
 		self.reversive_boundary = 70  # as boundary of
 		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
 		self.min_oscl = 0  # force oscillation
@@ -38,10 +41,17 @@ class PID_Controller:
 
 
 		''' contextual callback '''
-		self._callback_conditions = ['245 < brightness() < 252']
-		self._callback_funcs = ['alarm()']
+		self._callback_conditions = []
+		self._callback_funcs = []
+	
+	def all_white(self):
+		return self.all_white_threshold < brightness()
 		
-	def register(self, condition, callback):
+	def encountered_cross(self):
+		return self.cross_threshold < brightness()
+		
+				
+	def when(self, condition, callback):
 		# register a callback when certain condition is satisfied
 		# assert(type(condition) != str, "condition and callback must be executable expression/code in str")
 		# assert(type(callback) != str, "condition and callback must be executable expression/code in str")
@@ -60,12 +70,17 @@ class PID_Controller:
 	def effective(self, value):
 		# clip the effective value by 60
 		# because power lower than that will not work
+		'''_complement is an experimental feature'''
 		_complement = 1.1
+		
+		''' prepare for power reverse '''
 		reversive_boundary = self.reversive_boundary
 		delta = reversive_boundary - value
+		
+		''' power reverse and clipping '''
 		if reversive_boundary > value:
 			output = (-reversive_boundary-delta) * _complement
-			if output > 127:
+			if output > 127:  # the motor.run() accepts only a value betw -127 ~ 127
 				return 127
 			elif output < -127:
 				return -127
@@ -122,10 +137,11 @@ class PID_Controller:
 
 		# non-tunnable parameters
 
-		integral = 0
+		integral_history = 0
 		lasterror = 0
 		L = core.L
 		R = core.R
+		_r = 1
 
 		guard_window(stop)
 
@@ -137,26 +153,28 @@ class PID_Controller:
 			'''applying PID foundamental algorithm'''
 			light = brightness()
 			error = light - offset
-			integral += error
+			
+			integral_history += [error]
+			integral_history.pop() if len(integral_history) > self.history_len else 0
+			
 			deriv = error - lasterror
 			turn = kp * error + ki * integral + kd * deriv
-
+			
+			'''applying force oscillation'''
 			if self.min_oscl > turn > 0:
 				turn = self.min_oscl
 			elif -self.min_oscl < turn < 0:
 				turn = -self.min_oscl
 
-			'''applying force oscillation'''
-
-			_r = 1
-			_rl = 1.2
-			_rr = 1
+			'''applying alignment'''
 			if uniform(0, 1) < self.alignment:
 				_r = - _r
-			'''NOTE: clip_oscl is an experimental feature'''
+			
+			'''NOTE: clip oscillation is an experimental feature'''
 			if abs(turn) > self.clip_oscl:
 				continue
 				# turn = self.clip_oscl
+
 			powerL = tp + turn  * _r
 			powerR = tp - turn  * _r
 			# print(type(self.effective(powerR)))
