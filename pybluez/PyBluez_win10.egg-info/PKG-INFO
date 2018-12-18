@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: PyBluez-win10
+Version: 0.22
+Summary: Bluetooth Python extension module modified by Kiven for win10 compatibility
+Home-page: http://pybluez.github.io
+Author: Albert Huang
+Author-email: ashuang@alum.mit.edu
+Maintainer: Piotr Karulis and Kiven Chen
+License: GPL
+Download-URL: https://github.com/pybluez/pybluez
+Description: Bluetooth Python extension module to allow Python "                "developers to use system Bluetooth resources. PyBluez works "                "with GNU/Linux, macOS, and Windows XP.And kiven has adapted it to be comopatible with Windows 10 
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Communications
+Provides-Extra: ble
