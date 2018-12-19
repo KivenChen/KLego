@@ -30,17 +30,21 @@ class PID_Controller:
 		Except Cross Night config: 0.15 0.01 0.03
 		
 		"""
-		self.kp = -1  # learning rate
-		self.ki = 0.02  # integral weight
-		self.kd = 0.03  # derivative
+
+		'tp 85 -> kp est 0.5'
+		'tp 90 -> kp est 0.6 <- interval 0.01'
+		'tp 95 -> kp est ef'
+		self.kp = 0.4  # learning rate
+		self.ki = self.kp / 30  # integral weight
+		self.kd = self.kp / 40  # derivative
 
 		'''environmental parameters.  '''
 		"""NOTE: the offset should be tuned"""
-		self.offset = -1  # tune with calibrate_offset(), the brightness for half black, half white
-		self.tp = 76  # power value when the robot is cruising on a straight line
+		self.offset = 275  # tune with calibrate_offset(), the brightness for half black, half white
+		self.tp = 85  # power value when the robot is cruising on a straight line
 		self.interval = 0.01  # a float t. Update the brightness info every t seconds
 		self.all_white_threshold = -1
-		self.cross_threshold = 220
+		self.cross_threshold = 0
 
 		''' data postprocessing '''
 		self.history_len = 20
@@ -48,7 +52,7 @@ class PID_Controller:
 		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
 		self.min_oscl = 0  # force oscillation
 		self.alignment = 0.00
-		self.critical_light_reverse = 222
+		self.critical_light_reverse = 0
 
 
 		''' contextual callback '''
@@ -170,9 +174,9 @@ class PID_Controller:
 		_r = 1
 
 		guard_window(stop)
-
+		counter = 0
 		# main loop
-		while not core._stop:
+		while not core._stop :
 			''' update environment '''
 			light = self._verified_light(brightness())
 			error = light - offset
