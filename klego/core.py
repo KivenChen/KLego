@@ -4,6 +4,7 @@
 _debug = True
 _guard = False
 _debug_pid = True
+
 # tunable parameters
 GREEN_BLACK_BOUNDARY = 100  # deprecated
 GREEN_WHITE_BOUNDARY = 250  # deprecated
@@ -21,8 +22,7 @@ RADAR_BASE_POWER = 100
 _degree_to_seconds = to_secs = {
 
 }
-_degree_to_spin_r = to_rolls = \
-{
+_degree_to_spin_r = to_rolls = {
     '90': 0.51,
     '45': 0.26,
     '30': 0.11,
@@ -176,9 +176,7 @@ def hold_on():
         R.turn(1, 1)
 
 
-def stopped(motor=None):
-    if motor is None:
-        motor = M
+def stopped(motor=M):
     return motor._get_new_state().power == 0
 
 
@@ -300,6 +298,7 @@ def calibrate_light_by_black():  # deprecated
 def sound():
     Thread(target=brick.play_tone_and_wait, args=(1000, 500)).start()
 
+
 from pos_utils import *
 import nxt.locator as locator
 from nxt.motor import *
@@ -310,26 +309,81 @@ from threading import Thread
 from color_utils import *
 from dist_utils import *
 from PID import *
+from configobj import ConfigObj
+import os
 
 
-def reset(remote=False):
+def _int_values(d):
+    for i in d:
+        d[i] = int(d[i])
+
+
+
+def reset(remote=False, **custom_ports):
     global brick, L, R, M, radar_base, \
             light, sonic, touch, \
             LIGHT_BASE, _lock,\
             color, dist, pos, boxes, pid
+    port = {
+        'L': PORT_A,
+        'R': PORT_C,
+        'radar_base': PORT_B,
+        'sonic': PORT_1,
+        'light': PORT_4
+    }  # by default
 
-    print "CORE: Connecting via", 'Bluetooth. May take up to 20 seconds' if remote else 'USB'
+    to_port = {
+        'a': PORT_A, 'A': PORT_A,
+        'b': PORT_B, 'B': PORT_B,
+        'c': PORT_C, 'C': PORT_C,
+        1: PORT_1,
+        2: PORT_2,
+        3: PORT_3,
+        4: PORT_4
+    }
+
+    for i in custom_ports:
+        custom_ports[i] = to_port[custom_ports[i]]
+
+    """
+        when custom_ports given:
+            config file exists:
+                update config
+            no:
+                write custom to config
+
+        when no custom_ports given:
+            config file exists:
+                read config
+            no:
+                write default to config
+    """
+
+    cf = ConfigObj("klego_ports.ini", encoding='utf-8')
+    if cf:  # config exists
+        port = cf['ports']
+    else:
+        cf['ports'] = port
+    _int_values(port)
+    for i in custom_ports:
+        if i in port:  # check validity
+            port[i] = custom_ports[i]  # update config
+    cf.write()  # update config
+
+
+    print "CORE: Connecting via", \
+        'Bluetooth. May take up to 20 seconds' if remote else 'USB'
     connect_method = locator.Method(not remote, remote)
     brick = locator.find_one_brick(method=connect_method, debug=False)
     print("Connection to brick established\n")
 
     print("CORE: Initializing components")
-    L = Motor(brick, PORT_A)
-    R = Motor(brick, PORT_C)
+    L = Motor(brick, port['L'])
+    R = Motor(brick, port['R'])
     M = SynchronizedMotors(L, R, TURN_RATIO)
 
     try:
-        radar_base = Motor(brick, PORT_B)
+        radar_base = Motor(brick, port['radar_base'])
         print("CORE: Found radar turning base")
         # _handle_radar_base(radar_base)
     except:
@@ -337,8 +391,8 @@ def reset(remote=False):
         print("Normal Mode activated")
 
     _lock = False
-    light = Light(brick, PORT_1)
-    sonic = Ultrasonic(brick, PORT_2)
+    light = Light(brick, port['light'])
+    sonic = Ultrasonic(brick, port['sonic'])
     # touch = Touch(brick, PORT_4)
     sleep(1)
     color = Color(light)
@@ -349,7 +403,7 @@ def reset(remote=False):
         dist = Distance(sonic)
     pid = PID_Controller()
     if _guard:
-        guard_window()
+        guard_window(stop)
     # calibrate light sensor
     light.set_illuminated(True)
     if not LIGHT_SENSOR_ILLUMINATED:
@@ -366,4 +420,3 @@ except locator.BrickNotFoundError:
     reset(True)
 
 atexit.register(stop)
-from guard import *

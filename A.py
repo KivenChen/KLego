@@ -3,17 +3,13 @@ import atexit
 from klego import core
 from klego.core import *
 from klego.core import _stop
-
-from tkinter import Tk
-import tkinter as tk
-from sys import exit
+from klego.guard import *
 
 atexit.register(stop)
 
 # tunable parameters
 CRUISING_SPEED = 75
 APPROACHING_SPEED = 55
-
 
 
 def test():
@@ -73,7 +69,7 @@ def run():
 def test_parta():
     try:
         print('guard: in progress')
-        guard_window()
+        guard_window(stop)
         run()
     except Exception as e:
         print(e.message)

@@ -4,7 +4,7 @@ kLego is a minimalist yet powerful framework for controlling Lego Mindstorm NXT,
 
 ## Why kLego?
 
-项目的作者 [Kiven](https://kivenchen.us/about-me) 对学校 Lego Assignment 感到厌烦，希望能反抗 Lego Mindstorm NXT 图形化编程的暴政，同时希望尝试一个关于硬件的开源项目，因此开发了 kLego （原名 PyLego）。
+项目的作者 [Kiven](https://kivenchen.us/about-me) 对学校 Lego Assignment 在图形化编程上出现的各种问题感到不解，希望能反抗 Lego Mindstorm NXT 图形化编程的暴政，同时希望尝试一个关于硬件的开源项目，因此开发了 kLego （原名 PyLego）。
 
 出于 Python 易用、灵活，且第三方模块相当丰富，kLego 基于 Python 2.7 打造。
 

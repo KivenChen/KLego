@@ -13,3 +13,4 @@ prune __pycache__
 
 exclude A.py
 exclude B.py
+exclude *.npy

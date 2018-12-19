@@ -1,5 +1,7 @@
 from math import sin, sqrt, cos, radians as rad
-
+from core import _stop, going_back, going_forward, stopped, turning
+from time import sleep
+from threading import Thread
 '''
 this file provides the utilities for tracking robot and boxes locations
 the **core** module will import this file and create *boxes* and *pos* for use
@@ -7,17 +9,14 @@ I will consider separating this util files from *nav_utils*
 so that the core tech of coordinating will not be open-sourced
 '''
 
-# forward and left when see dark
-# forward and right when see light
 
-
-class Position:
+class Position(object):
 	def __init__(self, x=0, y=0, d=0):
 		self.x = x
 		self.y = y
 		self.d = d
 		self.accurate = True
-	
+
 	def track(self, d_delta, dpm, continuous=False):
 		# tracks the position change
 		# d_delta: the change of direction clockwise
@@ -40,8 +39,29 @@ class Position:
 		return '%d, %d, direction: %d' % (self.x, self.y, self.d)
 
 
+class PositionTracker(Position):
+	def __init__(self):
+		super(PositionTracker, self).__init__()
+		self.interval = 0.1
+		self.dpm_delta = 0.2
+	
+	def _monitor(self):
+		while not _stop:
+			sleep(self.interval)
+			if stopped() or turning():
+				pass
+			elif going_forward():
+				self.track(0, self.dpm_delta)
+			elif going_back():
+				self.track(0, -self.dpm_delta)
+
+	def activate(self):
+		Thread(target=self._monitor()).start()
+
+
 class Box(Position):
 	def __init__(self, x=0, y=0, d=0, ok=True):
+		super(Box, self).__init__()
 		self.x = x
 		self.y = y
 		self.d = d
@@ -60,14 +80,14 @@ class Boxes(list):
 	
 	def nearest(self, robo_pos):
 		# return the nearest and ok-to-go box
-		min = 0
-		mindist = 99999
+		target = 0
+		min_dist = 99999
 		for i, box in enumerate(self):
 			dist = robo_pos.dist(box.pos)
-			if dist < mindist and box.new:
-				mindist = dist
-				min = box
-		return min
+			if dist < min_dist and box.new:
+				min_dist = dist
+				target = box
+		return target
 
 	def overlapped(self, target_pos, threshold=14):
 		# check if the target is already discovered
@@ -79,7 +99,6 @@ class Boxes(list):
 		return False
 
 
-
 def test():
 	b1 = Box(10, 20)
 	b2 = Box(10, 20)
@@ -88,7 +107,6 @@ def test():
 	boxes.add(b1)
 	boxes.add(b2)
 	print(boxes[1])
-	print(boxes._discover(Position(30, 15, 45), 5))
 	print(boxes)
 
 

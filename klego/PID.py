@@ -1,10 +1,11 @@
 import core
-from core import brightness
+from core import brightness, stop
 from time import sleep
-from core import stop
+from core import *
 from guard import *
 import numpy as np
 import atexit
+
 atexit.register(stop)
 from random import uniform
 
@@ -30,8 +31,8 @@ class PID_Controller:
 		
 		"""
 		self.kp = -1  # learning rate
-		self.ki = 0.01  # integral weight
-		self.kd = 0.02  # derivative
+		self.ki = 0.02  # integral weight
+		self.kd = 0.03  # derivative
 
 		'''environmental parameters.  '''
 		"""NOTE: the offset should be tuned"""
@@ -47,12 +48,12 @@ class PID_Controller:
 		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
 		self.min_oscl = 0  # force oscillation
 		self.alignment = 0.00
-		self.critical_light_reverse = 190
+		self.critical_light_reverse = 222
 
 
 		''' contextual callback '''
 		self._callback_conditions = []
-		self._callback_funcs = []
+		self._callback_execs = []
 	
 	def all_white(self):
 		"""
@@ -68,19 +69,19 @@ class PID_Controller:
 		"""
 		return self.cross_threshold > brightness()
 
-	def when(self, condition, *args):
+	def when(self, condition, *callbacks):
 		"""
+		register callbacks to PID controller
 		:param condition: string oode to run
-		:param callback: string code to run
+		:param callbacks: to execute
 		:return:
 		"""
-		# assert(type(condition) != str, "condition and callback must be executable expression/code in str")
-		# assert(type(callback) != str, "condition and callback must be executable expression/code in str")
-		
-		self._callback_conditions += [condition]
-		self._callback_funcs += list(args)
-		# not yet ready for function-oriented programming
-		# self._callback_args += [(*args, **kwargs)]
+		assert \
+			type(condition) == str and \
+			all([type(i) == str for i in callbacks]),\
+			"the condition and the callbacks must be executable expression/code in str"
+		self._callback_conditions.append(condition)
+		self._callback_execs.append(callbacks)
 	
 	def _handle_callback(self):
 		"""
@@ -89,13 +90,13 @@ class PID_Controller:
 		"""
 		for i, c in enumerate(self._callback_conditions):
 			if eval(c):
-				for f in self._callback_funcs[i]:
-					eval(f)
+				for exe_code in self._callback_execs[i]:
+					exec exe_code
 
 	def effective(self, value):
 		'''
-		:param value: power value
-		:return:
+		:param value: original value
+		:return: adjusted power value
 		'''
 		_complement = 1.1
 		
@@ -105,20 +106,9 @@ class PID_Controller:
 		
 		''' power reverse and clipping '''
 		if reversive_boundary > value:
-			output = (-reversive_boundary-delta) * _complement
-			if output > 127:  # the motor.run() accepts only a value betw -127 ~ 127
-				return 127
-			elif output < -127:
-				return -127
-			else:
-				return output
-		else:
-			if value > 127:
-				return 127
-			elif value < -127:
-				return 127
-			else:
-				return value
+			value = (-reversive_boundary-delta) * _complement
+		value = np.clip(value, -127, 127)  # the motor.run() function can only accepts a value between -127 and 127
+		return value
 
 	def save_model(self, fpath):
 		np.save(fpath, np.asarray([self]))
@@ -137,7 +127,7 @@ class PID_Controller:
 		return cont[0]
 
 	def __str__(self):
-		return 'kp: %d, ki: %d, kd: %d, offset: %d, tp: %d'\
+		return 'kp: %.3f, ki: %.3f, kd: %.3f, offset: %d, tp: %d'\
 			% (self.kp, self.ki, self.kd, self.offset, self.tp)
 
 	def __call__(self, *args, **kwargs):
@@ -146,9 +136,9 @@ class PID_Controller:
 	def calibrate_offset(self):
 		from core import spin
 		bottom1 = brightness()
-		_, light1 = spin(0.2), brightness()
-		_, light2 = spin(-0.4), brightness()
-		spin(0.2)
+		_, light1 = spin(0.3), brightness()
+		_, light2 = spin(-0.6), brightness()
+		spin(0.3)
 		bottom2 = brightness()
 		avg_light = (light1 + light2) // 2
 		print(avg_light)
@@ -219,7 +209,8 @@ class PID_Controller:
 			powerL = tp + turn  * _r
 			powerR = tp - turn  * _r
 			# print(type(self.effective(powerR)))
-			print (powerL, ' ', powerR) if self._debug else ''
+			if self._debug:
+				print (powerL, ' ', powerR)
 
 			'''apply clipping through effective()'''
 			L.run(self.effective(powerL))

@@ -12,11 +12,6 @@ from core import going_back, going_forward, turning
 _debug = False  # if broadcast debug info
 
 
-def _fix_error(dist):
-    # try to fix the turbulence
-    pass
-
-
 def certain_history(hist):
     return hist.count(255) < 7
 
@@ -29,9 +24,9 @@ def update_dist(dist):
 
     # algorithm: get the modes
     now = np.argmax(np.bincount(now))
+    '''
     prev = np.argmax(np.bincount(prev))
     stable = abs(now - prev) < dist.EXCEPTION_THRESHOLD
-    '''
     if stable and now > dist.NORMDIST_THRESHOLD:
         debug('safe', dist.now, dist.history)
     elif stable and now < dist.NORMDIST_THRESHOLD:
@@ -41,8 +36,9 @@ def update_dist(dist):
         dist.danger = True
         debug("not stable", dist.now, dist.history)
     '''
-    _r = calc.time_linearity(history) if certain_history(history) else 1
-    danger_dist = calc.updated_danger_dist(dist.NORMDIST_THRESHOLD, _r, 'logistic')
+    _r = Calc.time_linearity(history) if certain_history(history) else 1
+    danger_dist = Calc.updated_danger_dist(
+        dist.NORMDIST_THRESHOLD, _r, dist.algorithm)
 
     if now < danger_dist:
         dist.danger = True
@@ -109,13 +105,16 @@ class Distance:
         self.now = sensor.get_distance()
         self.history = [sensor.get_distance() for i in range(self.HISTORY_LEN)]
         self.danger = obstacle_inbound
+        self.algorithm = 'logistic'
         self.activate()
 
     def __call__(self):
         return self.now
         
 
-class calc:
+class Calc:
+    """encapsulates some calculation funcs"""
+
     @staticmethod
     def time_linearity(X):
         Y = [i for i in range(len(X))]
@@ -134,4 +133,4 @@ class calc:
         elif algo == 'sqrt':
             return orig / math.sqrt(linearity)
         elif algo == 'logistic':
-            return calc.sigmoid(linearity, logistic_coef)
+            return Calc.sigmoid(linearity, logistic_coef)
