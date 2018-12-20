@@ -3,7 +3,7 @@
 # dev ops
 _debug = True
 _guard = False
-_debug_pid = True
+_debug_pid = False
 
 # tunable parameters
 GREEN_BLACK_BOUNDARY = 100  # deprecated

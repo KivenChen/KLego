@@ -13,6 +13,7 @@ from random import uniform
 def alarm():
 	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
+
 class PID_Controller:
 	def __init__(self, debug=False):
 		# dev ops
@@ -43,7 +44,7 @@ class PID_Controller:
 		self.offset = 275  # tune with calibrate_offset(), the brightness for half black, half white
 		self.tp = 85  # power value when the robot is cruising on a straight line
 		self.interval = 0.01  # a float t. Update the brightness info every t seconds
-		self.all_white_threshold = -1
+		self.finish_line_brightness = 380
 		self.cross_threshold = 0
 
 		''' data postprocessing '''
@@ -51,20 +52,12 @@ class PID_Controller:
 		self.reversive_boundary = 70  # as boundary of
 		self.clip_oscl = 999  # disallow any greater gap between L, R motor power
 		self.min_oscl = 0  # force oscillation
-		self.alignment = 0.00
+		self.alignment = 0.
 		self.critical_light_reverse = 0
 
-
 		''' contextual callback '''
-		self._callback_conditions = []
-		self._callback_execs = []
-	
-	def all_white(self):
-		"""
-		judge if the robot is encountering all-white situation
-		:return: bool
-		"""
-		return self.all_white_threshold < brightness()
+		self._callback_conditions = ["brightness() > finish_line"]
+		self._callback_execs = [("return True",)]
 		
 	def encountered_cross(self):
 		"""
@@ -160,7 +153,7 @@ class PID_Controller:
 		kp = self.kp
 		ki = self.ki
 		kd = self.kd
-
+		finish_line = self.finish_line_brightness
 		interval = self.interval
 		offset = self.offset  # todo: mean of brightness
 		tp = self.tp
