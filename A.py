@@ -5,10 +5,8 @@ from klego.core import *
 from klego.core import _stop
 from klego.guard import *
 
-atexit.register(stop)
-
 # tunable parameters
-CRUISING_SPEED = 75
+CRUISING_SPEED = 85
 APPROACHING_SPEED = 55
 
 
@@ -31,11 +29,12 @@ def run():
             color.color = 'white'
             color.reset()  # todo: if this is a green one?
             dist.reset()
-            direction = random.uniform(core.to_rolls['90'], core.to_rolls['90'] * 1.5) // 0.01 / 100
+            direction = random.uniform(core.to_rolls['45'] * 1.5, core.to_rolls['90'] * 1.5) // 0.01 / 100
             spin(direction)
             M.run(CRUISING_SPEED)
+            continue
 
-        if dist.danger:  # obstacle inboundd
+        if dist.danger:  # obstacle inbound
             stop()
             print('obstacle inbound')
             '''
@@ -44,7 +43,6 @@ def run():
             '''
             if green():  # bonus
                 print("bonus !!!")
-                stop()
                 f(0.3)
                 sound()
                 b(1)  # go back

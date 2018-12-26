@@ -18,6 +18,7 @@ def _monitor_color(inst):
     # well ... I'm pretty sure only ONE second is needed actually
     # because if core module is yet to be loaded, the importation will run into error
     from core import L, R
+    to_be_verified = False
 
     while True:
         l_power, r_power = L._get_new_state().power, R._get_new_state().power
@@ -35,15 +36,18 @@ def _monitor_color(inst):
         if l_power < 0 and r_power < 0:  # backward
             # continue
             pass
-        if _power < 50:  # not even moving
-            continue
-
+        # if _power < 50:  # not even moving
+        #   continue
+        '''
         inst.history.pop()
         inst.history.insert(0, inst.now)
         inst.prev = sum(inst.history[4:]) / (len(inst.history) - 4)
         inst.reset()
-        inst.now = sum(inst.history[4:]) / (len(inst.history) - 4)
-
+        inst.now = sum(inst.history[:4]) / 4
+        '''
+        inst.prev = inst.now
+        inst.now = inst.sensor.get_lightness()
+        '''
         if inst._debug_refresh:
             print (inst.prev, inst.now)
 
@@ -54,15 +58,15 @@ def _monitor_color(inst):
         if inst.now - inst.prev > _r*inst.G_TO_W and inst.color == 'green':
                 inst.color = 'white'
                 inst.reset()
-                print "COLOR: change from GREEN 2 WHITE" if _debug_color_change else 0
+                print "COLOR: change from GREEN 2 WHITE" if _debug_color_change else ''
         elif _r*inst.B_TO_G < inst.now - inst.prev < _r*inst.B_TO_W and inst.color == 'black':
                 inst.color = 'green'
                 inst.reset()
-                print "COLOR: change from BLACK 2 GREEN" if _debug_color_change else 0
+                print "COLOR: change from BLACK 2 GREEN" if _debug_color_change else ''
         elif _r*inst.B_TO_W < inst.now - inst.prev and inst.color == 'black':
             inst.color = 'white'
             inst.reset()
-            print "COLOR: change from BLACK 2 WHITE" if _debug_color_change else 0
+            print "COLOR: change from BLACK 2 WHITE" if _debug_color_change else ''
 
         # GETTING DARKER
         if _r*inst.B_TO_W > inst.prev - inst.now > inst.G_TO_W*_r and inst.color == 'white':
@@ -78,7 +82,15 @@ def _monitor_color(inst):
                 inst.color = 'black'
                 inst.reset()
                 print("COLOR: change from WHITE 2 BLACK")
-
+        '''
+        if inst.now > 340:
+            inst.color = 'white'
+        elif 200 < inst.now < 340:
+            if 200 < inst.prev < 340:
+                inst.color = 'green'
+        else:
+            inst.color = 'black'
+        sleep(0.1)
 
 class Color:
     def __init__(self, sensor, calibrate_by='white'):
@@ -90,10 +102,10 @@ class Color:
 
         self._debug_global = False
         self._debug_color = True
-        self._debug_refresh = False
+        self._debug_refresh = True
 
-        self.B_TO_G = 70 // 2
-        self.G_TO_W = 90 // 2
+        self.B_TO_G = 50 // 2.5
+        self.G_TO_W = 80 // 2.5
         self.B_TO_W = self.B_TO_G + self.G_TO_W
 
         work = Thread(target=_monitor_color, args=(self,), name='color')
@@ -101,9 +113,7 @@ class Color:
 
     def reset(self):
         def _work(self):
-            self.history = [(self.sensor.get_lightness(),
-                             sleep(0.005)
-                             )[0] for i in range(10)]
+            self.history = [(self.sensor.get_lightness(), sleep(0.015))[0] for i in range(10)]
         _work(self)
         # Thread(target=_work, args=(self,)).start()
 

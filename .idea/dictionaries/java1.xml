@@ -1,3 +1,11 @@
 <component name="ProjectDictionaryState">
-  <dictionary name="java1" />
+  <dictionary name="java1">
+    <words>
+      <w>bluetooth</w>
+      <w>configobj</w>
+      <w>klego</w>
+      <w>pyusb</w>
+      <w>scipy</w>
+    </words>
+  </dictionary>
 </component>

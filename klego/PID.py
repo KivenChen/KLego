@@ -1,7 +1,7 @@
 import core
-from core import brightness, stop
-from time import sleep
-from core import *
+from core import brightness, stop, f
+from time import sleep, time
+from core import L, R
 from guard import *
 import numpy as np
 import atexit
@@ -13,7 +13,8 @@ from random import uniform
 def alarm():
 	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
-class PID_Controller:
+
+class PIDController:
 	def __init__(self, debug=False):
 		# dev ops
 		self._debug = False
@@ -34,17 +35,18 @@ class PID_Controller:
 		'tp 85 -> kp est 0.5'
 		'tp 90 -> kp est 0.6 <- interval 0.01'
 		'tp 95 -> kp est ef'
-		self.kp = 0.4  # learning rate
-		self.ki = self.kp / 30  # integral weight
+		self.kp = 1.  # learning rate
+		self.ki = self.kp / 40  # integral weight
 		self.kd = self.kp / 40  # derivative
 
 		'''environmental parameters.  '''
 		"""NOTE: the offset should be tuned"""
-		self.offset = 275  # tune with calibrate_offset(), the brightness for half black, half white
-		self.tp = 85  # power value when the robot is cruising on a straight line
-		self.interval = 0.01  # a float t. Update the brightness info every t seconds
+		self.offset = 360  # tune with calibrate_offset(), the brightness for half black, half white
+		self.tp = 80  # power value when the robot is cruising on a straight line
+		self.interval = 0.0  # a float t. Update the brightness info every t seconds
 		self.all_white_threshold = -1
 		self.cross_threshold = 0
+		self.endpoint = 450
 
 		''' data postprocessing '''
 		self.history_len = 20
@@ -53,12 +55,14 @@ class PID_Controller:
 		self.min_oscl = 0  # force oscillation
 		self.alignment = 0.00
 		self.critical_light_reverse = 0
+		self.motion_archive = []
 
 
 		''' contextual callback '''
-		self._callback_conditions = []
-		self._callback_execs = []
-	
+		self._callback_conditions = ["brightness() > 999"]
+		self._callback_execs = [('stop()', 'self.final()', '')]
+
+
 	def all_white(self):
 		"""
 		judge if the robot is encountering all-white situation
@@ -137,6 +141,19 @@ class PID_Controller:
 	def __call__(self, *args, **kwargs):
 		return str(self)
 
+	def revert_motion(self, steps):
+		for i in self.motion_archive[:-steps:-1]:
+			lp, rp, t = i
+			core.L.run(-lp)
+			core.R.run(-rp)
+			sleep(t)
+
+	def final(self):
+		self.revert_motion()
+		stop()
+		f(3.3)
+
+
 	def calibrate_offset(self):
 		from core import spin
 		bottom1 = brightness()
@@ -152,6 +169,7 @@ class PID_Controller:
 		return self.offset
 
 	def run(self):
+
 		if self.offset == -1:
 			raise ValueError("Please invoke pid.calibrate_offset() first")
 		if self.kp == -1:
@@ -172,18 +190,21 @@ class PID_Controller:
 		L = core.L
 		R = core.R
 		_r = 1
-
+		tricked = False
 		guard_window(stop)
 		counter = 0
 		# main loop
 		while not core._stop :
+			st = time()
 			''' update environment '''
 			light = self._verified_light(brightness())
 			error = light - offset
 
 			''' handling callback '''
-			self._handle_callback()
-
+			if brightness() > self.endpoint:
+				stop()
+				f(3.3)
+				return True
 			
 			'''applying PID foundamental algorithm'''
 			
@@ -221,4 +242,9 @@ class PID_Controller:
 			R.run(self.effective(powerR))
 			lasterror = error
 			sleep(interval)
+			ed = time()
+			real_interval = ed - st
+			self.motion_archive += [(self.effective(powerL), self.effective(powerR), real_interval)]
 		return False
+
+

@@ -24,10 +24,9 @@ paramset_redirect = {
     'vialent_twilight': paramset_b
 }
 
+
 def run(mode):
-    """
-    todo： select or create one param set
-    """
+    # todo: select or create one param set
     parameters = {
         'kp': 0,
         'ki': 0,

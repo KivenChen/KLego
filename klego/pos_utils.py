@@ -1,5 +1,5 @@
 from math import sin, sqrt, cos, radians as rad
-from core import _stop, going_back, going_forward, stopped, turning
+from core import _stop, going_back, going_forward, stopped, turning, _get_counts, robot_diameter
 from time import sleep
 from threading import Thread
 '''
@@ -38,25 +38,43 @@ class Position(object):
 	def __str__(self):
 		return '%d, %d, direction: %d' % (self.x, self.y, self.d)
 
+	def __call__(self, *args, **kwargs):
+		return self.x, self.y, self.d
+
 
 class PositionTracker(Position):
 	def __init__(self):
 		super(PositionTracker, self).__init__()
 		self.interval = 0.1
-		self.dpm_delta = 0.2
-	
+		orig_l, orig_r = _get_counts()
+		self.prevL = orig_l  # previous tacho count
+		self.prevR = orig_r
+
+	def reset(self):
+		"""reset the tacho count base and the numbers
+		"""
+		orig_l, orig_r = _get_counts()
+		self.prevL = orig_l
+		self.prevR = orig_r
+		self.x = 0
+		self.y = 0
+		self.d = 0
+
+	@staticmethod
+	def _turnlen_to_dgr(turn_len):
+
+		pass
+
 	def _monitor(self):
-		while not _stop:
+		while True:
 			sleep(self.interval)
-			if stopped() or turning():
-				pass
-			elif going_forward():
-				self.track(0, self.dpm_delta)
-			elif going_back():
-				self.track(0, -self.dpm_delta)
+			nowL, nowR = _get_counts()
+			deltaL = nowL - self.prevL
+			deltaR = nowR - self.prevR
+
 
 	def activate(self):
-		Thread(target=self._monitor()).start()
+		Thread(target=self._monitor).start()
 
 
 class Box(Position):

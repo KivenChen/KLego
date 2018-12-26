@@ -3,7 +3,7 @@
 # dev ops
 _debug = True
 _guard = False
-_debug_pid = True
+_debug_pid = False
 
 # tunable parameters
 GREEN_BLACK_BOUNDARY = 100  # deprecated
@@ -14,9 +14,9 @@ LIGHT_BASE = 12
 CM_EACH_ROLL = 0
 LIGHT_SENSOR_ILLUMINATED = True
 
-RADAR_BASE_INIT = 0.15
-RADAR_BASE_PERIODIC = 0.3
-RADAR_BASE_POWER = 100
+RADAR_BASE_INIT = 1
+RADAR_BASE_PERIODIC = 2
+RADAR_BASE_POWER = 75
 
 # todo: test it out
 _degree_to_seconds = to_secs = {
@@ -35,7 +35,7 @@ _degree_to_spin_r = to_rolls = {
 
 
 print("kLego initializing.")
-print("Powered by Kiven - 2018\n")
+print("Powered by Kiven - 2018")
 
 # initializing protected fields and protected functions
 # Protected fields and functions begin with '_',
@@ -57,6 +57,7 @@ dist = None
 pos = None  # which marks the position of the robot
 boxes = None  # which stores all the boxes here
 pid = None
+robot_diameter = 0.
 
 ''' this file is to be run separately
 '''
@@ -146,7 +147,7 @@ def spin(r=1.0, t=None, p=55):
         r = to_rolls[r]
     if t:
         L.run(-p), R.run(p)
-        sleep(t), stop()
+        sleep(t), stop( )
         return _get_counts() if _debug else None
 
     if r < 0:
@@ -224,7 +225,7 @@ def _continuous_track_by_time(t, p):
     Thread(target=_run, args=(t, p)).start()
 
 
-def f(r=1, t=None, p=75):
+def f(r=1, t=None, p=80):
     global _lock
     # pos.track(0, to_cm(r))
     if t:
@@ -241,7 +242,7 @@ def f(r=1, t=None, p=75):
         return _get_counts() if _debug else None
 
 
-def b(r=1, t=None, p=75):
+def b(r=1, t=None, p=80):
     return f(r, t, -p)
 
 
@@ -318,18 +319,19 @@ def _int_values(d):
         d[i] = int(d[i])
 
 
-
 def reset(remote=False, **custom_ports):
     global brick, L, R, M, radar_base, \
             light, sonic, touch, \
             LIGHT_BASE, _lock,\
+            robot_diameter, \
             color, dist, pos, boxes, pid
-    port = {
+    conf = {
         'L': PORT_A,
         'R': PORT_C,
         'radar_base': PORT_B,
         'sonic': PORT_1,
-        'light': PORT_4
+        'light': PORT_4,
+        'robot_diameter': 16.85
     }  # by default
 
     to_port = {
@@ -359,15 +361,15 @@ def reset(remote=False, **custom_ports):
                 write default to config
     """
 
-    cf = ConfigObj("klego_ports.ini", encoding='utf-8')
+    cf = ConfigObj("klego.ini", encoding='utf-8')
     if cf:  # config exists
-        port = cf['ports']
+        conf = cf['conf']
     else:
-        cf['ports'] = port
-    _int_values(port)
+        cf['conf'] = conf
+    _int_values(conf)
     for i in custom_ports:
-        if i in port:  # check validity
-            port[i] = custom_ports[i]  # update config
+        if i in conf:  # check validity
+            conf[i] = custom_ports[i]  # update config
     cf.write()  # update config
 
 
@@ -378,12 +380,12 @@ def reset(remote=False, **custom_ports):
     print("Connection to brick established\n")
 
     print("CORE: Initializing components")
-    L = Motor(brick, port['L'])
-    R = Motor(brick, port['R'])
+    L = Motor(brick, conf['L'])
+    R = Motor(brick, conf['R'])
     M = SynchronizedMotors(L, R, TURN_RATIO)
 
     try:
-        radar_base = Motor(brick, port['radar_base'])
+        radar_base = Motor(brick, conf['radar_base'])
         print("CORE: Found radar turning base")
         # _handle_radar_base(radar_base)
     except:
@@ -391,17 +393,17 @@ def reset(remote=False, **custom_ports):
         print("Normal Mode activated")
 
     _lock = False
-    light = Light(brick, port['light'])
-    sonic = Ultrasonic(brick, port['sonic'])
+    light = Light(brick, conf['light'])
+    sonic = Ultrasonic(brick, conf['sonic'])
     # touch = Touch(brick, PORT_4)
     sleep(1)
     color = Color(light)
     global dist
     if not _debug_pid:
-        pos = Position()  # which marks the position of the robot
+        pos = PositionTracker()  # which marks the position of the robot
         boxes = Boxes()  # which stores all the boxes here
         dist = Distance(sonic)
-    pid = PID_Controller()
+    pid = PIDController()
     if _guard:
         guard_window(stop)
     # calibrate light sensor
@@ -416,7 +418,5 @@ def reset(remote=False, **custom_ports):
 try:
     reset()
 except locator.BrickNotFoundError:
-    print("CORE: USB connection not found. Switching connection to bluetooth\n")
+    print("CORE: USB connection not found. Switching connection to bluetooth")
     reset(True)
-
-atexit.register(stop)
