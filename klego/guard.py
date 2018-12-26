@@ -4,11 +4,13 @@ from threading import Thread
 from random import randint
 dist_label = None
 
+
 def update_dist_data(dist_label):
     while True:
         sleep(0.005)
         text = str(randint(1,10)) + 'test'
         dist_label['text'] = text
+
 
 def _guard(stop_func):
     global dist_label

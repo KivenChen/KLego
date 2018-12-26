@@ -2,6 +2,7 @@ from math import sin, sqrt, cos, radians as rad
 from core import _stop, going_back, going_forward, stopped, turning, _get_counts, robot_diameter
 from time import sleep
 from threading import Thread
+from pos_calc import *
 '''
 this file provides the utilities for tracking robot and boxes locations
 the **core** module will import this file and create *boxes* and *pos* for use
@@ -71,7 +72,14 @@ class PositionTracker(Position):
 			nowL, nowR = _get_counts()
 			deltaL = nowL - self.prevL
 			deltaR = nowR - self.prevR
+			dx, dy, dD = poscalc(deltaL, deltaR, robot_diameter)
 
+			self.x += dx*sin(rad(self.d))
+			self.y += dy*cos(rad(self.d))
+			self.d += degrees(dD)
+
+			self.prevL = nowL
+			self.prevR = nowR
 
 	def activate(self):
 		Thread(target=self._monitor).start()

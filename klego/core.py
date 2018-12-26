@@ -372,8 +372,7 @@ def reset(remote=False, **custom_ports):
             conf[i] = custom_ports[i]  # update config
     cf.write()  # update config
 
-
-    print "CORE: Connecting via", \
+    print "CORE: Connecting via " + \
         'Bluetooth. May take up to 20 seconds' if remote else 'USB'
     connect_method = locator.Method(not remote, remote)
     brick = locator.find_one_brick(method=connect_method, debug=False)
@@ -386,6 +385,7 @@ def reset(remote=False, **custom_ports):
 
     try:
         radar_base = Motor(brick, conf['radar_base'])
+        assert radar_base
         print("CORE: Found radar turning base")
         # _handle_radar_base(radar_base)
     except:
