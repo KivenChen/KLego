@@ -6,7 +6,7 @@ instead of using fixed thresholds
 
 from threading import Thread
 from time import sleep
-
+from .core import L, R
 
 _debug_color_change = False
 
@@ -17,7 +17,6 @@ def _monitor_color(inst):
     print("COLOR: ready")
     # well ... I'm pretty sure only ONE second is needed actually
     # because if core module is yet to be loaded, the importation will run into error
-    from core import L, R
     to_be_verified = False
 
     while True:

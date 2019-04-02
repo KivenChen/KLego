@@ -372,8 +372,8 @@ def reset(remote=False, **custom_ports):
             conf[i] = custom_ports[i]  # update config
     cf.write()  # update config
 
-    print "CORE: Connecting via " + \
-        'Bluetooth. May take up to 20 seconds' if remote else 'USB'
+    print("CORE: Connecting via " + \
+        'Bluetooth. May take up to 20 seconds' if remote else 'USB')
     connect_method = locator.Method(not remote, remote)
     brick = locator.find_one_brick(method=connect_method, debug=False)
     print("Connection to brick established\n")
